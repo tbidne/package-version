@@ -4,7 +4,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
--- | This module provides functionality for reading the cabal version
+-- | This module provides functionality for reading a package's version
 -- at compile-time.
 --
 -- @since 0.1.0.0
@@ -48,7 +48,8 @@ import System.IO qualified as IO
 import Text.Read qualified as TR
 
 -- | 'PackageVersion' represents [PVP](https://pvp.haskell.org/) version
--- numbers. It is similar to (and in fact wraps) 'Version' except:
+-- numbers. It is similar to (and in fact wraps) "Data.Version"'s 'Version'
+-- except:
 --
 -- 1. Versions' 'versionTags' is totally ignored in 'Eq', 'Ord', 'Semigroup',
 --    and 'Monoid'.
@@ -64,11 +65,11 @@ import Text.Read qualified as TR
 -- and its 'Semigroup' instance takes the latest version (based on 'Ord').
 --
 -- Because we export the underlying 'Version' in various ways,
--- (e.g. 'MkPackageVersion', 'show'), 'Eq'/'Ord' technically break Leibniz's
--- law, sometimes called substitutivity:
+-- (e.g. 'MkPackageVersion', 'show'), 'Eq' breaks Leibniz's law,
+-- sometimes called substitutivity:
 --
 -- @
--- x == y ==> f x == f y for all f
+-- x == y ==> f x == f y
 -- @
 --
 -- ==== __Examples__

@@ -26,4 +26,7 @@ jobs:
         # No --pure because we need git to clone the non-hackage dependency,
         # and if we try to add git to ci.nix then we some kind of SSL
         # certificate problem.
-        run: nix-shell ci.nix --command "cabal update && cabal build"
+        run: nix-shell nix/ci.nix --command "cabal update && cabal build"
+      
+      - name: Test
+        run: nix-shell nix/ci.nix --command "cabal update && cabal test"

@@ -159,10 +159,6 @@ instance Lift PackageVersion where
 -- >>> $$(packageVersionTH "package-version.cabal")
 -- MkPackageVersion {unPackageVersion = Version {versionBranch = [0,1,0,0], versionTags = []}}
 --
--- >>> $$(packageVersionTH "not-found.cabal")
--- Exception when trying to run compile-time code:
---   not-found.cabal: openFile: does not exist (No such file or directory)
---
 -- @since 0.1.0.0
 packageVersionTH :: FilePath -> Q (TExp PackageVersion)
 packageVersionTH fp =

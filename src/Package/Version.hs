@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -41,7 +42,11 @@ import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Version (Version (..))
 import Data.Version qualified as V
-import Language.Haskell.TH (Q, TExp (..))
+#if MIN_VERSION_template_haskell(2, 17, 0)
+import Language.Haskell.TH (Code, Q)
+#else
+import Language.Haskell.TH (Q, TExp)
+#endif
 import Language.Haskell.TH qualified as TH
 import Language.Haskell.TH.Syntax (Lift (..))
 import System.IO qualified as IO
@@ -161,10 +166,17 @@ instance Lift PackageVersion where
 -- MkPackageVersion {unPackageVersion = Version {versionBranch = [0,1,0,0], versionTags = []}}
 --
 -- @since 0.1.0.0
+#if MIN_VERSION_template_haskell(2, 17, 0)
+packageVersionTH :: FilePath -> Code Q PackageVersion
+packageVersionTH fp = TH.bindCode qVersion liftTyped
+  where
+    qVersion = either error id <$> TH.runIO (packageVersionEitherIO fp)
+#else
 packageVersionTH :: FilePath -> Q (TExp PackageVersion)
 packageVersionTH fp =
   TH.runIO (packageVersionEitherIO fp)
     >>= either error liftTyped
+#endif
 
 -- | Version of 'packageVersionTH' that returns a string representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
@@ -178,8 +190,15 @@ packageVersionTH fp =
 -- "UNKNOWN"
 --
 -- @since 0.1.0.0
+#if MIN_VERSION_template_haskell(2, 17, 0)
+packageVersionStringTH :: FilePath -> Code Q String
+packageVersionStringTH fp = TH.bindCode qVersion liftTyped
+  where
+    qVersion = TH.runIO (packageVersionStringIO fp)
+#else
 packageVersionStringTH :: FilePath -> Q (TExp String)
 packageVersionStringTH fp = TH.runIO (packageVersionStringIO fp) >>= liftTyped
+#endif
 
 -- | Version of 'packageVersionTH' that returns a 'Text' representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
@@ -193,8 +212,15 @@ packageVersionStringTH fp = TH.runIO (packageVersionStringIO fp) >>= liftTyped
 -- "UNKNOWN"
 --
 -- @since 0.1.0.0
+#if MIN_VERSION_template_haskell(2, 17, 0)
+packageVersionTextTH :: FilePath -> Code Q Text
+packageVersionTextTH fp = TH.bindCode qVersion liftTyped
+  where
+    qVersion = TH.runIO (packageVersionTextIO fp)
+#else
 packageVersionTextTH :: FilePath -> Q (TExp Text)
 packageVersionTextTH fp = TH.runIO (packageVersionTextIO fp) >>= liftTyped
+#endif
 
 -- | Version of 'packageVersionTH' that returns an 'Either' rather than a
 -- compilation error for when something goes wrong.
@@ -207,10 +233,17 @@ packageVersionTextTH fp = TH.runIO (packageVersionTextIO fp) >>= liftTyped
 -- Left "not-found.cabal: openFile: does not exist (No such file or directory)"
 --
 -- @since 0.1.0.0
+#if MIN_VERSION_template_haskell(2, 17, 0)
+packageVersionEitherTH :: FilePath -> Code Q (Either String PackageVersion)
+packageVersionEitherTH fp = TH.bindCode qVersion liftTyped
+  where
+    qVersion = TH.runIO (packageVersionEitherIO fp)
+#else
 packageVersionEitherTH :: FilePath -> Q (TExp (Either String PackageVersion))
 packageVersionEitherTH fp =
   TH.runIO (packageVersionEitherIO fp)
     >>= liftTyped
+#endif
 
 -- | Version of 'packageVersionEitherIO' that returns a 'String' representation of
 -- 'PackageVersion' at runtime. Returns @\"UNKNOWN\"@ if any errors are

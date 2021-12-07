@@ -3,6 +3,7 @@ name:               package-version
 version:            0.1.0.0
 license:            MIT
 license-file:       LICENSE
+tested-with:        GHC ==8.10.7 || ==9.0.1
 copyright:          2021 Thomas Bidne
 author:             Thomas Bidne
 maintainer:         tbidne@prontonmail.com
@@ -27,7 +28,7 @@ library
   exposed-modules:  Package.Version
   build-depends:
     , attoparsec        >=0.13.2.3 && <0.15
-    , base              ^>=4.14.1.0
+    , base              >=4.14.1.0 && <4.16
     , safe-exceptions   ^>=0.1.7.0
     , template-haskell  >=2.16.0.0 && <2.18
     , text              ^>=1.2.3.2

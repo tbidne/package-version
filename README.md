@@ -16,13 +16,6 @@
 </a>
 <img alt="GitHub" src="https://img.shields.io/github/license/tbidne/package-version?style=plastic&color=blue">
 
-</div>
-
-This package can be used to retrieve a haskell package's version number (defined in the cabal file) at compile-time.
-
-### GHC Build Matrix
-
-<div align="center">
 <table>
   <thead>
     <th><code>package-version</code> / GHC</th>
@@ -46,6 +39,8 @@ This package can be used to retrieve a haskell package's version number (defined
 </div>
 
 # Package Description
+
+This package can be used to retrieve a haskell package's version number (defined in the cabal file) at compile-time. This can be useful for implementing a `--version` option in executables.
 
 ## Types
 

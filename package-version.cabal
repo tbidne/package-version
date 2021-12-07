@@ -15,7 +15,7 @@ description:
   This version number can be retrieved at compile-time via @TemplateHaskell@
   or runtime via ordinary functions.
 
-category:           System
+category:           Development
 extra-source-files:
   CHANGELOG.md
   README.md

@@ -5,7 +5,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
--- | This module provides functionality for reading a package's version
+-- |
+-- Module: Package.Version
+-- Copyright: 2021 Thomas Bidne
+-- License: MIT
+-- Stability: experimental
+--
+-- This module provides functionality for reading a package's version
 -- at compile-time.
 --
 -- @since 0.1.0.0
@@ -253,8 +259,8 @@ packageVersionEitherTH fp =
 -- >>> packageVersionStringIO "package-version.cabal"
 -- "0.1.0.0"
 --
--- >>> packageVersionStringIO "package-version.cabal"
--- "0.1.0.0"
+-- >>> packageVersionStringIO "not-found.cabal"
+-- "UNKNOWN"
 --
 -- @since 0.1.0.0
 packageVersionStringIO :: FilePath -> IO String
@@ -272,8 +278,8 @@ packageVersionStringIO fp = do
 -- >>> packageVersionTextIO "package-version.cabal"
 -- "0.1.0.0"
 --
--- >>> packageVersionTextIO "package-version.cabal"
--- "0.1.0.0"
+-- >>> packageVersionTextIO "not-found.cabal"
+-- "UNKNOWN"
 --
 -- @since 0.1.0.0
 packageVersionTextIO :: FilePath -> IO Text

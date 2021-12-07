@@ -39,3 +39,6 @@ jobs:
 
       - name: nixpkgs-fmt
         run: nix develop --command bash ./ci_scripts/nixpkgs-fmt.sh
+      
+      - name: haddock
+        run: nix develop --command bash ./ci_scripts/haddock.sh

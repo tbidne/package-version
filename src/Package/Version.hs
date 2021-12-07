@@ -253,8 +253,8 @@ packageVersionEitherTH fp =
 -- >>> packageVersionStringIO "package-version.cabal"
 -- "0.1.0.0"
 --
--- >>> packageVersionStringIO "package-version.cabal"
--- "0.1.0.0"
+-- >>> packageVersionStringIO "not-found.cabal"
+-- "UNKNOWN"
 --
 -- @since 0.1.0.0
 packageVersionStringIO :: FilePath -> IO String
@@ -272,8 +272,8 @@ packageVersionStringIO fp = do
 -- >>> packageVersionTextIO "package-version.cabal"
 -- "0.1.0.0"
 --
--- >>> packageVersionTextIO "package-version.cabal"
--- "0.1.0.0"
+-- >>> packageVersionTextIO "not-found.cabal"
+-- "UNKNOWN"
 --
 -- @since 0.1.0.0
 packageVersionTextIO :: FilePath -> IO Text

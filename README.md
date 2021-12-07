@@ -2,6 +2,9 @@
 
 # Package Version
 
+<a href="https://hackage.haskell.org/package/package-version">
+  <img alt="GitHub" src="https://img.shields.io/hackage/v/package-version?style=plastic">
+</a>
 <a href="https://github.com/tbidne/package-version/actions/workflows/cabal_ci.yaml">
   <img alt="GitHub" src="https://img.shields.io/github/workflow/status/tbidne/package-version/cabal/main?label=cabal&logoColor=white&style=plastic">
 </a>
@@ -11,29 +14,22 @@
 <a href="https://github.com/tbidne/package-version/actions/workflows/nix_ci.yaml">
   <img alt="GitHub" src="https://img.shields.io/github/workflow/status/tbidne/package-version/nix/main?label=nix&logo=nixos&logoColor=white&style=plastic">
 </a>
-<a href="https://github.com/tbidne/package-version/actions/workflows/style.yaml">
-  <img alt="GitHub" src="https://img.shields.io/github/workflow/status/tbidne/package-version/nix/main?label=style&logoColor=white&style=plastic">
-</a>
 <img alt="GitHub" src="https://img.shields.io/github/license/tbidne/package-version?style=plastic&color=blue">
 
 <table>
   <thead>
     <th><code>package-version</code> / GHC</th>
-    <th>9.0.1</th>
-    <th>8.10.7</th>
+    <th><code>9.0.1</code></th>
+    <th><code>8.10.7</code></th>
   </thead>
   <tr>
-    <td><code>0.1.0.0</code></td>
     <td>
-      <a href="https://github.com/tbidne/package-version/actions/workflows/ghc_9-0-1.yaml">
-        <img alt="GitHub" src="https://img.shields.io/github/workflow/status/tbidne/package-version/9.0.1/main?label=9.0.1&logo=haskell&logoColor=white&style=plastic">
-      </a>
+    <a href="https://github.com/tbidne/package-version/releases/tag/0.1.0.0">
+      <img alt="GitHub" src="https://img.shields.io/badge/release-0.1.0.0-blue?style=plastic">
+    </a>
     </td>
-    <td>
-      <a href="https://github.com/tbidne/package-version/actions/workflows/ghc_8-10-7.yaml">
-        <img alt="GitHub" src="https://img.shields.io/github/workflow/status/tbidne/package-version/8.10.7/main?label=8.10.7&logo=haskell&logoColor=white&style=plastic">
-      </a>
-    </td>
+    <td>:heavy_check_mark:</td>
+    <td>:heavy_check_mark:</td>
   </tr>
 </table>
 </div>

@@ -1,6 +1,7 @@
 # cabal
 dist-newstyle
 cabal.project.local
+/.ghc.environment*
 
 # stack
 .stack-work*

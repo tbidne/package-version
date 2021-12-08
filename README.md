@@ -19,6 +19,7 @@
 <table>
   <thead>
     <th><code>package-version</code> / GHC</th>
+    <th><code>9.2.1</code></th>
     <th><code>9.0.1</code></th>
     <th><code>8.10.7</code></th>
   </thead>
@@ -28,6 +29,7 @@
       <img alt="GitHub" src="https://img.shields.io/badge/release-0.1.0.0-blue?style=plastic">
     </a>
     </td>
+    <td>:heavy_check_mark:</td>
     <td>:heavy_check_mark:</td>
     <td>:heavy_check_mark:</td>
   </tr>

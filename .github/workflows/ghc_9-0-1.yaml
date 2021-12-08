@@ -8,7 +8,7 @@ on:
   pull_request:
     branches:
       - main
-  
+
   workflow_dispatch:
 
 jobs:
@@ -23,7 +23,15 @@ jobs:
           nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/c71f061c68ba8ce53471b767d5049cbd0f3d8490.tar.gz
 
       - name: Compile
-        run: nix-shell nix/ghc_9-0-1.nix --command "cabal build"
-      
+        run: |
+          nix-shell nix/ghc_9-0-1.nix --command \
+            "cabal update && \
+             cabal build --write-ghc-environment-files=always"
+
+      # Ensure the env vars are there for doctest
       - name: Test
-        run: nix-shell nix/ghc_9-0-1.nix --command "cabal test"
+        run: |
+          nix-shell nix/ghc_9-0-1.nix --command \
+            "cabal update && \
+             cabal build --write-ghc-environment-files=always && \
+             cabal test"

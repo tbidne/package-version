@@ -1,4 +1,4 @@
-name: "8.10.7"
+name: "9.2.1"
 
 on:
   push:
@@ -24,14 +24,14 @@ jobs:
 
       - name: Compile
         run: |
-          nix-shell nix/ghc_8-10-7.nix --command \
+          nix-shell nix/ghc_9-2-1.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always"
 
       # Ensure the env vars are there for doctest
       - name: Test
         run: |
-          nix-shell nix/ghc_8-10-7.nix --command \
+          nix-shell nix/ghc_9-2-1.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
              cabal test"

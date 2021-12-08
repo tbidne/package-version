@@ -10,9 +10,10 @@
 [![Nix CI](https://img.shields.io/github/workflow/status/tbidne/package-version/nix/main?label=nix&logo=nixos&logoColor=white)](https://github.com/tbidne/package-version/actions/workflows/nix_ci.yaml)
 [![MIT](https://img.shields.io/github/license/tbidne/package-version?color=blue)](https://opensource.org/licenses/MIT)
 
-`package-version` / GHC | 9.2.1 | 9.0.1 | 8.10.7
-:----------------------:|:-----:|:-----:|:-----:
-[![`0.1.0.0`](https://img.shields.io/badge/release-0.1.0.0-blue)](https://github.com/tbidne/package-version/releases/tag/0.1.0.0) | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:
+|                       | GHC | 9.2.1 | 9.0.1 | 8.10.7
+|:---------------------:|:---:|:-----:|:-----:|:-----:
+`package-version`       |     |       |       |
+| [![`0.1.0.0`](https://img.shields.io/badge/release-0.1.0.0-blue)](https://github.com/tbidne/package-version/releases/tag/0.1.0.0) | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:
 
 </div>
 

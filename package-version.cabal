@@ -25,7 +25,7 @@ source-repository head
   location: https://github.com/tbidne/package-version
 
 library
-  exposed-modules:  Package.Version
+  exposed-modules:  Data.Version.Package
   build-depends:
     , attoparsec        >=0.13.2.3 && <0.15
     , base              >=4.14.1.0 && <4.17

@@ -12,7 +12,7 @@ main = DT.doctest args
 files :: [String]
 files =
   [ "-isrc",
-    "src/Package/Version.hs"
+    "src/Data/Version/Package.hs"
   ]
 
 exts :: [String]

@@ -26,24 +26,26 @@ module Data.Version.Package
 
     -- ** Creation
     mkPackageVersion,
+    mkPackageVersionTH,
     unsafePackageVersion,
     fromVersion,
     fromString,
     fromText,
 
     -- ** Elimination
-    unPackageVersion,
     toVersion,
     toString,
     toText,
 
-    -- * TemplateHaskell
+    -- * Reading Cabal Files
+
+    -- ** TemplateHaskell
     packageVersionTH,
     packageVersionStringTH,
     packageVersionTextTH,
     packageVersionEitherTH,
 
-    -- * IO
+    -- ** IO
     packageVersionStringIO,
     packageVersionTextIO,
     packageVersionEitherIO,
@@ -202,24 +204,30 @@ mkPackageVersion short =
     "PackageVersion must have length > 2 to meet the PVP minimum A.B.C: "
       <> show short
 
+-- | Safely constructs a 'PackageVersion' at compile-time.
+--
+-- ==== __Examples__
+-- >>> $$(mkPackageVersionTH [2,4,0])
+-- UnsafePackageVersion {unPackageVersion = [2,4,0]}
+--
+-- @since 0.1.0.0
+#if MIN_VERSION_template_haskell(2,17,0)
+mkPackageVersionTH :: [Int] -> Code Q PackageVersion
+#else
+mkPackageVersionTH :: [Int] -> Q (TExp PackageVersion)
+#endif
+mkPackageVersionTH v = case mkPackageVersion v of
+  Right pv -> liftTyped pv
+  Left err -> error err
+
 -- | Unsafe version of 'mkPackageVersion', intended to be used with known
--- constants.
+-- constants. Maybe you should use 'mkPackageVersionTH'?
 --
 -- __WARNING: This function is not total. Exercise restraint!__
 --
 -- ==== __Examples__
 -- >>> unsafePackageVersion [1,2,3]
 -- UnsafePackageVersion {unPackageVersion = [1,2,3]}
---
--- >>> unsafePackageVersion [1,2,-3]
--- UnsafePackageVersion {unPackageVersion = *** Exception: PackageVersion cannot contain any negative digits: -3
--- CallStack (from HasCallStack):
---   error, called at src/Data/Version/Package.hs:226:31 in main:Data.Version.Package
---
--- >>> unsafePackageVersion [1]
--- UnsafePackageVersion {unPackageVersion = *** Exception: PackageVersion must have length > 2 to meet the PVP minimum A.B.C: [1]
--- CallStack (from HasCallStack):
---   error, called at src/Data/Version/Package.hs:226:31 in main:Data.Version.Package
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion

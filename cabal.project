@@ -6,3 +6,8 @@ package package-version
     -Wincomplete-record-updates -Wincomplete-uni-patterns
     -Wmissing-home-modules -Wmissing-export-lists -Wpartial-fields
     -Wredundant-constraints
+
+source-repository-package
+    type: git
+    location: https://github.com/tbidne/refined-simple.git
+    tag: e7eea9040edbff5bb984daaa8802ef90bd07f590

@@ -22,9 +22,16 @@
 module Data.Version.Package
   ( -- * Type
     PackageVersion (..),
+
+    -- ** Creation
     fromVersion,
+    fromString,
+    fromText,
+
+    -- ** Elimination
     toVersion,
-    showPackageVersion,
+    toString,
+    toText,
 
     -- * TemplateHaskell
     packageVersionTH,
@@ -140,6 +147,18 @@ instance Semigroup PackageVersion where
 instance Monoid PackageVersion where
   mempty = MkPackageVersion []
 
+-- | @since 0.1.0.0
+instance Lift PackageVersion where
+  liftTyped (MkPackageVersion v) = [||MkPackageVersion v||]
+
+dropTrailingZeroes :: (Eq a, Num a) => [a] -> [a]
+dropTrailingZeroes xs = take (lastNonZero xs) xs
+  where
+    lastNonZero = snd . F.foldl' go (0, 0)
+    go (!idx, !acc) x
+      | x /= 0 = (idx + 1, idx + 1)
+      | otherwise = (idx + 1, acc)
+
 -- | Creates a 'PackageVersion' from 'Version'. Note that because
 -- 'PackageVersion' does not have a 'versionTags', 'fromVersion'
 -- is not injective, i.e., @'toVersion' . 'fromVersion'@ is /not/
@@ -153,6 +172,54 @@ instance Monoid PackageVersion where
 fromVersion :: Version -> PackageVersion
 fromVersion (Version v _) = MkPackageVersion v
 
+-- | Attempts to read a 'String' into a 'PackageVersion'. Leading and/or
+-- trailing dots will result in an error, as will the empty string.
+--
+-- ==== __Examples__
+-- >>> fromString "1.4.27.3"
+-- Right (MkPackageVersion {unPackageVersion = [1,4,27,3]})
+--
+-- >>> fromString ""
+-- Left "Prelude.read: no parse"
+--
+-- >>> fromString "1.a.2"
+-- Left "Prelude.read: no parse"
+--
+-- >>> fromString ".1.2"
+-- Left "Prelude.read: no parse"
+--
+-- >>> fromString "1.2."
+-- Left "Prelude.read: no parse"
+--
+-- @since 0.1.0.0
+fromString :: String -> Either String PackageVersion
+fromString = fromText . T.pack
+
+-- | Attempts to read a 'Text' into a 'PackageVersion'. Leading and/or
+-- trailing dots will result in an error, as will the empty string.
+--
+-- ==== __Examples__
+-- >>> fromText "1.4.27.3"
+-- Right (MkPackageVersion {unPackageVersion = [1,4,27,3]})
+--
+-- >>> fromText ""
+-- Left "Prelude.read: no parse"
+--
+-- >>> fromText "1.a.2"
+-- Left "Prelude.read: no parse"
+--
+-- >>> fromText ".1.2"
+-- Left "Prelude.read: no parse"
+--
+-- >>> fromText "1.2."
+-- Left "Prelude.read: no parse"
+--
+-- @since 0.1.0.0
+fromText :: Text -> Either String PackageVersion
+fromText txt = MkPackageVersion <$> traverse (TR.readEither . T.unpack) sections
+  where
+    sections = T.split (== '.') txt
+
 -- | Creates a 'Version' with empty 'versionTags' from 'PackageVersion'.
 --
 -- ==== __Examples__
@@ -163,27 +230,25 @@ fromVersion (Version v _) = MkPackageVersion v
 toVersion :: PackageVersion -> Version
 toVersion (MkPackageVersion v) = Version v []
 
-dropTrailingZeroes :: (Eq a, Num a) => [a] -> [a]
-dropTrailingZeroes xs = take (lastNonZero xs) xs
-  where
-    lastNonZero = snd . F.foldl' go (0, 0)
-    go (!idx, !acc) x
-      | x /= 0 = (idx + 1, idx + 1)
-      | otherwise = (idx + 1, acc)
-
--- | Displays 'PackageVersion' in traditional format.
+-- | Displays 'PackageVersion' in 'String' format.
 --
 -- ==== __Examples__
--- >>> showPackageVersion (MkPackageVersion [2,7,10,0])
+-- >>> toString (MkPackageVersion [2,7,10,0])
 -- "2.7.10.0"
 --
 -- @since 0.1.0.0
-showPackageVersion :: PackageVersion -> String
-showPackageVersion = L.intercalate "." . fmap show . unPackageVersion
+toString :: PackageVersion -> String
+toString = L.intercalate "." . fmap show . unPackageVersion
 
--- | @since 0.1.0.0
-instance Lift PackageVersion where
-  liftTyped (MkPackageVersion v) = [||MkPackageVersion v||]
+-- | Displays 'PackageVersion' in 'Text' format.
+--
+-- ==== __Examples__
+-- >>> toText (MkPackageVersion [2,7,10,0])
+-- "2.7.10.0"
+--
+-- @since 0.1.0.0
+toText :: PackageVersion -> Text
+toText = T.intercalate "." . fmap (T.pack . show) . unPackageVersion
 
 -- | TemplateHaskell for reading the cabal file's version at compile-time.
 -- Errors encountered will be returned as compilation errors.
@@ -289,7 +354,7 @@ packageVersionStringIO fp = do
   eVersion <- packageVersionEitherIO fp
   pure $ case eVersion of
     Left _ -> "UNKNOWN"
-    Right v -> showPackageVersion v
+    Right v -> toString v
 
 -- | Version of 'packageVersionEitherIO' that returns a 'Text' representation of
 -- 'PackageVersion' at runtime. Returns @\"UNKNOWN\"@ if any errors are
@@ -308,7 +373,7 @@ packageVersionTextIO fp = do
   eVersion <- packageVersionEitherIO fp
   pure $ case eVersion of
     Left _ -> "UNKNOWN"
-    Right v -> T.pack $ showPackageVersion v
+    Right v -> toText v
 
 -- | Reads the cabal-file's version.
 --

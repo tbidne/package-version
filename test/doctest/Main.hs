@@ -17,5 +17,6 @@ files =
 
 exts :: [String]
 exts =
-  [ "-XTemplateHaskell"
+  [ "-XOverloadedStrings",
+    "-XTemplateHaskell"
   ]

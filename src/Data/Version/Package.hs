@@ -168,17 +168,17 @@ dropTrailingZeroes xs = take (lastNonZero xs) xs
 -- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [2,87,7,1]}})
 --
 -- >>> mkPackageVersion [1,2,-3,-4,5]
--- Left "MkRefineException {predRep = GreaterThanEq 0, targetRep = Int, msg = \"-3 does not satisfy >= 0\"}"
+-- Left "-3 does not satisfy >= 0"
 --
 -- >>> mkPackageVersion [3,2]
--- Left "MkRefineException {predRep = MinLength 3, targetRep = [Int], msg = \"[3,2] does not satisfy length >= 3\"}"
+-- Left "[3,2] does not satisfy length >= 3"
 --
 -- >>> mkPackageVersion []
--- Left "MkRefineException {predRep = MinLength 3, targetRep = [Int], msg = \"[] does not satisfy length >= 3\"}"
+-- Left "[] does not satisfy length >= 3"
 --
 -- @since 0.1.0.0
 mkPackageVersion :: [Int] -> Either String PackageVersion
-mkPackageVersion = fmap MkPackageVersion . first show . R.refineAll
+mkPackageVersion = fmap MkPackageVersion . first R.msg . R.refineAll
 
 -- | Safely constructs a 'PackageVersion' at compile-time.
 --
@@ -220,7 +220,7 @@ unsafePackageVersion = MkPackageVersion . R.unsafeRefineAll
 -- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [2,13,0]}})
 --
 -- >>> fromVersion (Version [] [])
--- Left "MkRefineException {predRep = MinLength 3, targetRep = [Int], msg = \"[] does not satisfy length >= 3\"}"
+-- Left "[] does not satisfy length >= 3"
 --
 -- @since 0.1.0.0
 fromVersion :: Version -> Either String PackageVersion
@@ -246,10 +246,10 @@ fromVersion = mkPackageVersion . versionBranch
 -- Left "Prelude.read: no parse"
 --
 -- >>> fromString "1.3"
--- Left "\"MkRefineException {predRep = MinLength 3, targetRep = [Int], msg = \\\"[1,3] does not satisfy length >= 3\\\"}\""
+-- Left "[1,3] does not satisfy length >= 3"
 --
 -- >>> fromString "-3.1.2"
--- Left "\"MkRefineException {predRep = GreaterThanEq 0, targetRep = Int, msg = \\\"-3 does not satisfy >= 0\\\"}\""
+-- Left "-3 does not satisfy >= 0"
 --
 -- @since 0.1.0.0
 fromString :: String -> Either String PackageVersion
@@ -275,14 +275,14 @@ fromString = fromText . T.pack
 -- Left "Prelude.read: no parse"
 --
 -- >>> fromText "1.3"
--- Left "\"MkRefineException {predRep = MinLength 3, targetRep = [Int], msg = \\\"[1,3] does not satisfy length >= 3\\\"}\""
+-- Left "[1,3] does not satisfy length >= 3"
 --
 -- >>> fromText "-3.1.2"
--- Left "\"MkRefineException {predRep = GreaterThanEq 0, targetRep = Int, msg = \\\"-3 does not satisfy >= 0\\\"}\""
+-- Left "-3 does not satisfy >= 0"
 --
 -- @since 0.1.0.0
 fromText :: Text -> Either String PackageVersion
-fromText = readInts . splitDots >=> first show . mkPackageVersion
+fromText = readInts . splitDots >=> mkPackageVersion
   where
     splitDots = T.split (== '.')
     readInts = traverse (TR.readEither . T.unpack)

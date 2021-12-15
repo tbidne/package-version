@@ -29,6 +29,7 @@ library
   build-depends:
     , attoparsec        >=0.13.2.3 && <0.15
     , base              >=4.14.1.0 && <4.17
+    , deepseq           ^>=1.4.4.0
     , safe-exceptions   ^>=0.1.7.0
     , template-haskell  >=2.16.0.0 && <2.19
     , text              ^>=1.2.3.2

@@ -52,6 +52,8 @@ module Data.Version.Package
 where
 
 import Control.Applicative qualified as A
+import Control.DeepSeq (NFData (..))
+import Control.DeepSeq qualified as DS
 import Control.Exception.Safe (SomeException)
 import Control.Exception.Safe qualified as SafeEx
 import Control.Monad ((>=>))
@@ -182,6 +184,10 @@ instance Read PackageVersion where
       case mkPackageVersion intList of
         Left _ -> TR.pfail
         Right pv -> pure pv
+
+-- | @since 0.1.0.0
+instance NFData PackageVersion where
+  rnf (UnsafePackageVersion xs) = DS.deepseq xs ()
 
 dropTrailingZeroes :: (Eq a, Num a) => [a] -> [a]
 dropTrailingZeroes xs = take (lastNonZero xs) xs

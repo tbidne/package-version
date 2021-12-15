@@ -34,4 +34,4 @@ jobs:
           nix-shell nix/ghc_9-0-1.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
-             cabal test"
+             RUN_DOCTEST=true cabal test --test-show-details=direct"

@@ -28,4 +28,4 @@ jobs:
         run: stack build --ghc-options="-Werror"
       
       - name: Test
-        run: stack test
+        run: RUN_DOCTEST=true stack test

@@ -1,7 +1,7 @@
 cabal-version:      2.4
 name:               package-version
 version:            0.1.0.0
-license:            MIT
+license:            BSD-3-Clause
 license-file:       LICENSE
 tested-with:        GHC ==8.10.7 || ==9.0.1 || ==9.2.1
 copyright:          2021 Thomas Bidne

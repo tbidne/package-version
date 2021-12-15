@@ -11,7 +11,7 @@
 -- |
 -- Module: Data.Version.Package
 -- Copyright: 2021 Thomas Bidne
--- License: MIT
+-- License: BSD-3-Clause
 -- Stability: experimental
 --
 -- This module provides functionality for reading a package's version

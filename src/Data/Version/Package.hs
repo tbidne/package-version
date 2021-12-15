@@ -368,15 +368,12 @@ toText = T.intercalate "." . fmap (T.pack . show) . unPackageVersion
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
 packageVersionTH :: FilePath -> Code Q PackageVersion
-packageVersionTH fp = TH.bindCode qVersion liftTyped
-  where
-    qVersion = either error id <$> TH.runIO (packageVersionEitherIO fp)
 #else
 packageVersionTH :: FilePath -> Q (TExp PackageVersion)
-packageVersionTH fp =
-  TH.runIO (packageVersionEitherIO fp)
-    >>= either error liftTyped
 #endif
+packageVersionTH = ioToTH unsafePackageVersionIO
+  where
+    unsafePackageVersionIO = fmap (either error id) . packageVersionEitherIO
 
 -- | Version of 'packageVersionTH' that returns a string representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
@@ -392,13 +389,10 @@ packageVersionTH fp =
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
 packageVersionStringTH :: FilePath -> Code Q String
-packageVersionStringTH fp = TH.bindCode qVersion liftTyped
-  where
-    qVersion = TH.runIO (packageVersionStringIO fp)
 #else
 packageVersionStringTH :: FilePath -> Q (TExp String)
-packageVersionStringTH fp = TH.runIO (packageVersionStringIO fp) >>= liftTyped
 #endif
+packageVersionStringTH = ioToTH packageVersionStringIO
 
 -- | Version of 'packageVersionTH' that returns a 'Text' representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
@@ -414,13 +408,10 @@ packageVersionStringTH fp = TH.runIO (packageVersionStringIO fp) >>= liftTyped
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
 packageVersionTextTH :: FilePath -> Code Q Text
-packageVersionTextTH fp = TH.bindCode qVersion liftTyped
-  where
-    qVersion = TH.runIO (packageVersionTextIO fp)
 #else
 packageVersionTextTH :: FilePath -> Q (TExp Text)
-packageVersionTextTH fp = TH.runIO (packageVersionTextIO fp) >>= liftTyped
 #endif
+packageVersionTextTH = ioToTH packageVersionTextIO
 
 -- | Version of 'packageVersionTH' that returns an 'Either' rather than a
 -- compilation error for when something goes wrong.
@@ -435,15 +426,10 @@ packageVersionTextTH fp = TH.runIO (packageVersionTextIO fp) >>= liftTyped
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
 packageVersionEitherTH :: FilePath -> Code Q (Either String PackageVersion)
-packageVersionEitherTH fp = TH.bindCode qVersion liftTyped
-  where
-    qVersion = TH.runIO (packageVersionEitherIO fp)
 #else
 packageVersionEitherTH :: FilePath -> Q (TExp (Either String PackageVersion))
-packageVersionEitherTH fp =
-  TH.runIO (packageVersionEitherIO fp)
-    >>= liftTyped
 #endif
+packageVersionEitherTH = ioToTH packageVersionEitherIO
 
 -- | Version of 'packageVersionEitherIO' that returns a 'String' representation of
 -- 'PackageVersion' at runtime. Returns @\"UNKNOWN\"@ if any errors are
@@ -505,6 +491,14 @@ packageVersionEitherIO fp = do
     findVers line acc = case AP.parseOnly parser line of
       Right vers -> vers
       _ -> acc
+
+#if MIN_VERSION_template_haskell(2, 17, 0)
+ioToTH :: Lift b => (a -> IO b) -> a -> Code Q b
+ioToTH f x = TH.bindCode (TH.runIO (f x)) liftTyped
+#else
+ioToTH :: Lift b => (a -> IO b) -> a -> Q (TExp b)
+ioToTH f x = TH.runIO (f x) >>= liftTyped
+#endif
 
 parser :: Parser (Either String PackageVersion)
 parser =

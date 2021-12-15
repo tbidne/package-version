@@ -30,34 +30,10 @@
         "type": "indirect"
       }
     },
-    "refined-simple-src": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1639126839,
-        "narHash": "sha256-p/oDNU1JESUlDYXyzCZRDH8Veq5JMfmkAfFZrE2g2/Q=",
-        "owner": "tbidne",
-        "repo": "refined-simple",
-        "rev": "e7eea9040edbff5bb984daaa8802ef90bd07f590",
-        "type": "github"
-      },
-      "original": {
-        "owner": "tbidne",
-        "repo": "refined-simple",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs",
-        "refined-simple-src": "refined-simple-src"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

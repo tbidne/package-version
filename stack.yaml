@@ -2,6 +2,3 @@ resolver:
   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/13.yaml
 packages:
 - .
-extra-deps:
-- git: https://github.com/tbidne/refined-simple.git
-  commit: e7eea9040edbff5bb984daaa8802ef90bd07f590

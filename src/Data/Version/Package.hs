@@ -1,11 +1,12 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- |
 -- Module: Data.Version.Package
@@ -19,7 +20,7 @@
 -- @since 0.1.0.0
 module Data.Version.Package
   ( -- * Type
-    PackageVersion,
+    PackageVersion (MkPackageVersion),
 
     -- ** Creation
     mkPackageVersion,
@@ -30,6 +31,7 @@ module Data.Version.Package
     fromText,
 
     -- ** Elimination
+    unPackageVersion,
     toVersion,
     toString,
     toText,
@@ -64,6 +66,7 @@ import Data.List qualified as L
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Version (Version (..))
+import GHC.Read qualified as RD
 #if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
 #else
@@ -71,13 +74,15 @@ import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH qualified as TH
 import Language.Haskell.TH.Syntax (Lift (..))
-import Refined (All, MinLength, NonNegative, Refined (..))
-import Refined qualified as R
 import System.IO qualified as IO
 import Text.Read qualified as TR
 
+-- $setup
+-- >>> :set -XTypeApplications
+
 -- | 'PackageVersion' represents [PVP](https://pvp.haskell.org/) version
--- numbers. It is similar to "Data.Version"'s 'Version' except:
+-- numbers. It is similar to "Data.Version"'s 'Version' (i.e. wraps a
+-- @['Int']@) except:
 --
 -- 1. 'PackageVersion' has no 'versionTags'.
 -- 2. We enforce PVP's "tags must be at least A.B.C" invariant via the
@@ -94,11 +99,14 @@ import Text.Read qualified as TR
 -- and its 'Semigroup' instance takes the greatest version (based on 'Ord').
 --
 -- Note: Because we export the underlying list in various ways,
--- (e.g. 'show'), 'Eq'\'s extensionality can be broken:
+-- (e.g. 'show'), 'Eq'\'s extensionality law,
 --
 -- @
 -- x == y ==> f x == f y
 -- @
+--
+-- can be broken. Take care that you do not rely on this law if you are
+-- using its underlying @['Int']@ (or 'String') representation.
 --
 -- ==== __Examples__
 -- >>> unsafePackageVersion [0,0,0,0] == unsafePackageVersion [0,0,0]
@@ -108,29 +116,41 @@ import Text.Read qualified as TR
 -- True
 --
 -- >>> unsafePackageVersion [5,6,0] <> unsafePackageVersion [9,0,0]
--- MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [9,0,0]}}
+-- UnsafePackageVersion {unPackageVersion = [9,0,0]}
 --
 -- >>> unsafePackageVersion [9,0,0] <> unsafePackageVersion [9,0,0,0]
--- MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [9,0,0]}}
+-- UnsafePackageVersion {unPackageVersion = [9,0,0]}
+--
+-- >>> TR.readEither @PackageVersion "UnsafePackageVersion {unPackageVersion = [3,2,1]}"
+-- Right (UnsafePackageVersion {unPackageVersion = [3,2,1]})
+--
+-- >>> TR.readEither @PackageVersion "UnsafePackageVersion {unPackageVersion = [3,2]}"
+-- Left "Prelude.read: no parse"
 --
 -- @since 0.1.0.0
-newtype PackageVersion = MkPackageVersion
+newtype PackageVersion = UnsafePackageVersion
   { -- | @since 0.1.0.0
-    unPackageVersion :: Refined '[MinLength 3, All NonNegative] [Int]
+    unPackageVersion :: [Int]
   }
-  deriving
+  deriving stock
     ( -- | @since 0.1.0.0
       Show
     )
 
 -- | @since 0.1.0.0
+pattern MkPackageVersion :: [Int] -> PackageVersion
+pattern MkPackageVersion v <- UnsafePackageVersion v
+
+{-# COMPLETE MkPackageVersion #-}
+
+-- | @since 0.1.0.0
 instance Eq PackageVersion where
-  MkPackageVersion (MkRefined v1) == MkPackageVersion (MkRefined v2) =
+  UnsafePackageVersion v1 == UnsafePackageVersion v2 =
     dropTrailingZeroes v1 == dropTrailingZeroes v2
 
 -- | @since 0.1.0.0
 instance Ord PackageVersion where
-  MkPackageVersion (MkRefined v1) `compare` MkPackageVersion (MkRefined v2) =
+  UnsafePackageVersion v1 `compare` UnsafePackageVersion v2 =
     dropTrailingZeroes v1 `compare` dropTrailingZeroes v2
 
 -- | @since 0.1.0.0
@@ -142,11 +162,26 @@ instance Semigroup PackageVersion where
 
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where
-  mempty = MkPackageVersion $$(R.refineAllTH [0, 0, 0])
+  mempty = UnsafePackageVersion [0, 0, 0]
 
 -- | @since 0.1.0.0
 instance Lift PackageVersion where
-  liftTyped (MkPackageVersion v) = [||MkPackageVersion v||]
+  liftTyped (UnsafePackageVersion v) = [||UnsafePackageVersion v||]
+
+-- | This is exactly the version derived by GHC 8.10.7 with the exception
+-- that we also check the invariants via 'mkPackageVersion'.
+--
+-- @since 0.1.0.0
+instance Read PackageVersion where
+  readPrec = TR.parens $
+    TR.prec 11 $ do
+      RD.expectP $ TR.Ident "UnsafePackageVersion"
+      RD.expectP $ TR.Punc "{"
+      intList <- RD.readField "unPackageVersion" (TR.reset RD.readPrec)
+      RD.expectP $ TR.Punc "}"
+      case mkPackageVersion intList of
+        Left _ -> TR.pfail
+        Right pv -> pure pv
 
 dropTrailingZeroes :: (Eq a, Num a) => [a] -> [a]
 dropTrailingZeroes xs = take (lastNonZero xs) xs
@@ -162,29 +197,35 @@ dropTrailingZeroes xs = take (lastNonZero xs) xs
 -- ==== __Examples__
 --
 -- >>> mkPackageVersion [1,2,3]
--- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [1,2,3]}})
+-- Right (UnsafePackageVersion {unPackageVersion = [1,2,3]})
 --
 -- >>> mkPackageVersion [2,87,7,1]
--- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [2,87,7,1]}})
+-- Right (UnsafePackageVersion {unPackageVersion = [2,87,7,1]})
 --
 -- >>> mkPackageVersion [1,2,-3,-4,5]
--- Left "-3 does not satisfy >= 0"
+-- Left "PackageVersion cannot contain any negative digits: -3"
 --
 -- >>> mkPackageVersion [3,2]
--- Left "[3,2] does not satisfy length >= 3"
+-- Left "PackageVersion must have length > 2 to meet the PVP minimum A.B.C: [3,2]"
 --
 -- >>> mkPackageVersion []
--- Left "[] does not satisfy length >= 3"
+-- Left "PackageVersion must have length > 2 to meet the PVP minimum A.B.C: []"
 --
 -- @since 0.1.0.0
 mkPackageVersion :: [Int] -> Either String PackageVersion
-mkPackageVersion = fmap MkPackageVersion . first R.msg . R.refineAll
+mkPackageVersion v@(_ : _ : _ : _) = case filter (< 0) v of
+  [] -> Right $ UnsafePackageVersion v
+  (neg : _) -> Left $ "PackageVersion cannot contain any negative digits: " <> show neg
+mkPackageVersion short =
+  Left $
+    "PackageVersion must have length > 2 to meet the PVP minimum A.B.C: "
+      <> show short
 
 -- | Safely constructs a 'PackageVersion' at compile-time.
 --
 -- ==== __Examples__
 -- >>> $$(mkPackageVersionTH [2,4,0])
--- MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [2,4,0]}}
+-- UnsafePackageVersion {unPackageVersion = [2,4,0]}
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -203,11 +244,11 @@ mkPackageVersionTH v = case mkPackageVersion v of
 --
 -- ==== __Examples__
 -- >>> unsafePackageVersion [1,2,3]
--- MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [1,2,3]}}
+-- UnsafePackageVersion {unPackageVersion = [1,2,3]}
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion
-unsafePackageVersion = MkPackageVersion . R.unsafeRefineAll
+unsafePackageVersion = either error id . mkPackageVersion
 
 -- | Creates a 'PackageVersion' from 'Version'.
 --
@@ -217,10 +258,10 @@ unsafePackageVersion = MkPackageVersion . R.unsafeRefineAll
 --
 -- ==== __Examples__
 -- >>> fromVersion (Version [2,13,0] ["alpha"])
--- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [2,13,0]}})
+-- Right (UnsafePackageVersion {unPackageVersion = [2,13,0]})
 --
 -- >>> fromVersion (Version [] [])
--- Left "[] does not satisfy length >= 3"
+-- Left "PackageVersion must have length > 2 to meet the PVP minimum A.B.C: []"
 --
 -- @since 0.1.0.0
 fromVersion :: Version -> Either String PackageVersion
@@ -231,7 +272,7 @@ fromVersion = mkPackageVersion . versionBranch
 --
 -- ==== __Examples__
 -- >>> fromString "1.4.27.3"
--- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [1,4,27,3]}})
+-- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
 --
 -- >>> fromString ""
 -- Left "Prelude.read: no parse"
@@ -246,10 +287,10 @@ fromVersion = mkPackageVersion . versionBranch
 -- Left "Prelude.read: no parse"
 --
 -- >>> fromString "1.3"
--- Left "[1,3] does not satisfy length >= 3"
+-- Left "PackageVersion must have length > 2 to meet the PVP minimum A.B.C: [1,3]"
 --
 -- >>> fromString "-3.1.2"
--- Left "-3 does not satisfy >= 0"
+-- Left "PackageVersion cannot contain any negative digits: -3"
 --
 -- @since 0.1.0.0
 fromString :: String -> Either String PackageVersion
@@ -260,7 +301,7 @@ fromString = fromText . T.pack
 --
 -- ==== __Examples__
 -- >>> fromText "1.4.27.3"
--- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [1,4,27,3]}})
+-- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
 --
 -- >>> fromText ""
 -- Left "Prelude.read: no parse"
@@ -275,10 +316,10 @@ fromString = fromText . T.pack
 -- Left "Prelude.read: no parse"
 --
 -- >>> fromText "1.3"
--- Left "[1,3] does not satisfy length >= 3"
+-- Left "PackageVersion must have length > 2 to meet the PVP minimum A.B.C: [1,3]"
 --
 -- >>> fromText "-3.1.2"
--- Left "-3 does not satisfy >= 0"
+-- Left "PackageVersion cannot contain any negative digits: -3"
 --
 -- @since 0.1.0.0
 fromText :: Text -> Either String PackageVersion
@@ -290,39 +331,39 @@ fromText = readInts . splitDots >=> mkPackageVersion
 -- | Creates a 'Version' with empty 'versionTags' from 'PackageVersion'.
 --
 -- ==== __Examples__
--- >>> toVersion (unsafePackageVersion [3,2,0])
+-- >>> toVersion (UnsafePackageVersion [3,2,0])
 -- Version {versionBranch = [3,2,0], versionTags = []}
 --
 -- @since 0.1.0.0
 toVersion :: PackageVersion -> Version
-toVersion (MkPackageVersion v) = Version (R.unrefine v) []
+toVersion (UnsafePackageVersion v) = Version v []
 
 -- | Displays 'PackageVersion' in 'String' format.
 --
 -- ==== __Examples__
--- >>> toString (unsafePackageVersion [2,7,10,0])
+-- >>> toString (UnsafePackageVersion [2,7,10,0])
 -- "2.7.10.0"
 --
 -- @since 0.1.0.0
 toString :: PackageVersion -> String
-toString = L.intercalate "." . fmap show . R.unrefine . unPackageVersion
+toString = L.intercalate "." . fmap show . unPackageVersion
 
 -- | Displays 'PackageVersion' in 'Text' format.
 --
 -- ==== __Examples__
--- >>> toText (unsafePackageVersion [2,7,10,0])
+-- >>> toText (UnsafePackageVersion [2,7,10,0])
 -- "2.7.10.0"
 --
 -- @since 0.1.0.0
 toText :: PackageVersion -> Text
-toText = T.intercalate "." . fmap (T.pack . show) . R.unrefine . unPackageVersion
+toText = T.intercalate "." . fmap (T.pack . show) . unPackageVersion
 
 -- | TemplateHaskell for reading the cabal file's version at compile-time.
 -- Errors encountered will be returned as compilation errors.
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTH "package-version.cabal")
--- MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [0,1,0,0]}}
+-- UnsafePackageVersion {unPackageVersion = [0,1,0,0]}
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -334,7 +375,7 @@ packageVersionTH fp = TH.bindCode qVersion liftTyped
 packageVersionTH :: FilePath -> Q (TExp PackageVersion)
 packageVersionTH fp =
   TH.runIO (packageVersionEitherIO fp)
-    >>= either (error . show) liftTyped
+    >>= either error liftTyped
 #endif
 
 -- | Version of 'packageVersionTH' that returns a string representation of
@@ -386,7 +427,7 @@ packageVersionTextTH fp = TH.runIO (packageVersionTextIO fp) >>= liftTyped
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionEitherTH "package-version.cabal")
--- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [0,1,0,0]}})
+-- Right (UnsafePackageVersion {unPackageVersion = [0,1,0,0]})
 --
 -- >>> $$(packageVersionEitherTH "not-found.cabal")
 -- Left "not-found.cabal: openFile: does not exist (No such file or directory)"
@@ -446,7 +487,7 @@ packageVersionTextIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionEitherIO "package-version.cabal"
--- Right (MkPackageVersion {unPackageVersion = UnsafeRefined {unrefine = [0,1,0,0]}})
+-- Right (UnsafePackageVersion {unPackageVersion = [0,1,0,0]})
 --
 -- >>> packageVersionEitherIO "not-found.cabal"
 -- Left "not-found.cabal: openFile: does not exist (No such file or directory)"

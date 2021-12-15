@@ -381,7 +381,7 @@ packageVersionTH = ioToTH unsafePackageVersionIO
   where
     unsafePackageVersionIO = fmap (either error id) . packageVersionEitherIO
 
--- | Version of 'packageVersionTH' that returns a string representation of
+-- | Version of 'packageVersionTH' that returns a 'String' representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
 -- encountered.
 --

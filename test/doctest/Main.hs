@@ -10,7 +10,7 @@ main = do
   shouldRun <- Env.lookupEnv "RUN_DOCTEST"
   case shouldRun of
     Just "true" -> DT.doctest args
-    _ -> putStrLn "*** Doctests Disabled ***"
+    _ -> putStrLn "*** Doctests Disabled"
   where
     args = files <> exts
 
@@ -23,5 +23,5 @@ files =
 exts :: [String]
 exts =
   [ "-XOverloadedStrings",
-    "-XTemplateHaskell"
+    "-XTypeApplications"
   ]

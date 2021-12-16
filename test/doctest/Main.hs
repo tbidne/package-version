@@ -1,5 +1,3 @@
-{-# LANGUAGE ImportQualifiedPost #-}
-
 module Main (main) where
 
 import System.Environment qualified as Env
@@ -22,6 +20,13 @@ files =
 
 exts :: [String]
 exts =
-  [ "-XOverloadedStrings",
+  [ "-XBangPatterns",
+    "-XDeriveGeneric",
+    "-XDeriveLift",
+    "-XDerivingStrategies",
+    "-XImportQualifiedPost",
+    "-XOverloadedStrings",
+    "-XPatternSynonyms",
+    "-XScopedTypeVariables",
     "-XTypeApplications"
   ]

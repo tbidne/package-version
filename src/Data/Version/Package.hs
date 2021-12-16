@@ -1,14 +1,5 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveLift #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE ImportQualifiedPost #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- |
@@ -353,11 +344,6 @@ mkPackageVersionTH v = case mkPackageVersion v of
 -- ==== __Examples__
 -- >>> unsafePackageVersion [1,2,3]
 -- UnsafePackageVersion {unPackageVersion = [1,2,3]}
---
--- >>> unsafePackageVersion [1,2]
--- UnsafePackageVersion {unPackageVersion = *** Exception: PVP numbers must be at least A.B.C: [1, 2]
--- CallStack (from HasCallStack):
---   error, called at src/Data/Version/Package.hs:362:32 in main:Data.Version.Package
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion

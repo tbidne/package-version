@@ -24,11 +24,8 @@
 --
 -- @since 0.1.0.0
 module Data.Version.Package
-  ( -- * Types
+  ( -- * Type
     PackageVersion (MkPackageVersion),
-    ValidationError (..),
-    ReadValidateError (..),
-    ReadFileError (..),
 
     -- ** Creation
     mkPackageVersion,
@@ -57,6 +54,11 @@ module Data.Version.Package
     packageVersionStringIO,
     packageVersionTextIO,
     packageVersionEitherIO,
+
+    -- * Errors
+    ValidationError (..),
+    ReadStringError (..),
+    ReadFileError (..),
   )
 where
 
@@ -242,15 +244,15 @@ instance Pretty ValidationError where
 -- | Errors that can occur when reading PVP version numbers.
 --
 -- @since 0.1.0.0
-data ReadValidateError
+data ReadStringError
   = -- | Error when reading a string.
     --
     -- @since 0.1.0.0
-    RVReadStrErr String
+    RsReadStrErr String
   | -- | Validation error.
     --
     -- @since 0.1.0.0
-    RVValidateErr ValidationError
+    RsValidateErr ValidationError
   deriving stock
     ( -- | @since 0.1.0.0
       Generic,
@@ -263,9 +265,9 @@ data ReadValidateError
     )
 
 -- | @since 0.1.0.0
-instance Pretty ReadValidateError where
-  pretty (RVReadStrErr err) = pretty @Text "Read error:" <+> pretty err
-  pretty (RVValidateErr i) = pretty @Text "Validation error:" <+> pretty i
+instance Pretty ReadStringError where
+  pretty (RsReadStrErr err) = pretty @Text "Read error:" <+> pretty err
+  pretty (RsValidateErr i) = pretty @Text "Validation error:" <+> pretty i
 
 -- | Errors that can occur when reading PVP version numbers from a file.
 --
@@ -274,15 +276,15 @@ data ReadFileError
   = -- | Error for missing file.
     --
     -- @since 0.1.0.0
-    RFFileNotFoundErr String
+    RfFileNotFoundErr String
   | -- | Error for missing version.
     --
     -- @since 0.1.0.0
-    RFVersionNotFoundErr FilePath
+    RfVersionNotFoundErr FilePath
   | -- | Read/Validation error.
     --
     -- @since 0.1.0.0
-    RFReadValidateErr ReadValidateError
+    RfReadValidateErr ReadStringError
   deriving stock
     ( -- | @since 0.1.0.0
       Generic,
@@ -296,9 +298,9 @@ data ReadFileError
 
 -- | @since 0.1.0.0
 instance Pretty ReadFileError where
-  pretty (RFFileNotFoundErr f) = pretty @Text "File not found:" <+> pretty f
-  pretty (RFVersionNotFoundErr f) = pretty @Text "Version not found:" <+> pretty f
-  pretty (RFReadValidateErr i) = pretty @Text "Read/validation error:" <+> pretty i
+  pretty (RfFileNotFoundErr f) = pretty @Text "File not found:" <+> pretty f
+  pretty (RfVersionNotFoundErr f) = pretty @Text "Version not found:" <+> pretty f
+  pretty (RfReadValidateErr i) = pretty @Text "Read/validation error:" <+> pretty i
 
 -- | Smart constructor for 'PackageVersion'. The length of the list must be
 -- > 2 to match PVP's minimal A.B.C. Furthermore, all digits must be non-negative.
@@ -386,25 +388,25 @@ fromVersion = mkPackageVersion . versionBranch
 -- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
 --
 -- >>> fromString ""
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromString "1.a.2"
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromString ".1.2"
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromString "1.2."
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromString "1.3"
--- Left (RVValidateErr (VTooShortErr [1,3]))
+-- Left (RsValidateErr (VTooShortErr [1,3]))
 --
 -- >>> fromString "-3.1.2"
--- Left (RVValidateErr (VNegativeErr (-3)))
+-- Left (RsValidateErr (VNegativeErr (-3)))
 --
 -- @since 0.1.0.0
-fromString :: String -> Either ReadValidateError PackageVersion
+fromString :: String -> Either ReadStringError PackageVersion
 fromString = fromText . T.pack
 
 -- | Attempts to read a 'Text' into a 'PackageVersion'. Leading and/or
@@ -415,29 +417,29 @@ fromString = fromText . T.pack
 -- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
 --
 -- >>> fromText ""
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromText "1.a.2"
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromText ".1.2"
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromText "1.2."
--- Left (RVReadStrErr "Prelude.read: no parse")
+-- Left (RsReadStrErr "Prelude.read: no parse")
 --
 -- >>> fromText "1.3"
--- Left (RVValidateErr (VTooShortErr [1,3]))
+-- Left (RsValidateErr (VTooShortErr [1,3]))
 --
 -- >>> fromText "-3.1.2"
--- Left (RVValidateErr (VNegativeErr (-3)))
+-- Left (RsValidateErr (VNegativeErr (-3)))
 --
 -- @since 0.1.0.0
-fromText :: Text -> Either ReadValidateError PackageVersion
-fromText = readInts . splitDots >=> first RVValidateErr . mkPackageVersion
+fromText :: Text -> Either ReadStringError PackageVersion
+fromText = readInts . splitDots >=> first RsValidateErr . mkPackageVersion
   where
     splitDots = T.split (== '.')
-    readInts = first RVReadStrErr . traverse (TR.readEither . T.unpack)
+    readInts = first RsReadStrErr . traverse (TR.readEither . T.unpack)
 
 -- | Creates a 'Version' with empty 'versionTags' from 'PackageVersion'.
 --
@@ -592,12 +594,12 @@ packageVersionEitherIO fp = do
   eContents :: Either SomeException [Text] <-
     second (T.lines . T.pack) <$> SafeEx.try (readFile' fp)
   pure $ case eContents of
-    Left err -> Left $ RFFileNotFoundErr $ show err
+    Left err -> Left $ RfFileNotFoundErr $ show err
     Right contents -> foldr findVers noVersErr contents
   where
-    noVersErr = Left $ RFVersionNotFoundErr fp
+    noVersErr = Left $ RfVersionNotFoundErr fp
     findVers line acc = case T.stripPrefix "version:" line of
-      Just rest -> first RFReadValidateErr $ fromText (T.strip rest)
+      Just rest -> first RfReadValidateErr $ fromText (T.strip rest)
       Nothing -> acc
 
 #if MIN_VERSION_template_haskell(2, 17, 0)

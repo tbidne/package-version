@@ -27,7 +27,6 @@ source-repository head
 library
   exposed-modules:  Data.Version.Package
   build-depends:
-    , attoparsec        >=0.13.2.3 && <0.15
     , base              >=4.14.1.0 && <4.17
     , deepseq           ^>=1.4.4.0
     , prettyprinter     >=1.4.0    && <1.8

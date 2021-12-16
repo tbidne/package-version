@@ -60,19 +60,13 @@ module Data.Version.Package
   )
 where
 
-import Control.Applicative qualified as A
 import Control.DeepSeq (NFData (..))
 import Control.DeepSeq qualified as DS
 import Control.Exception.Safe (Exception, SomeException)
 import Control.Exception.Safe qualified as SafeEx
 import Control.Monad ((>=>))
-import Data.Attoparsec.Combinator qualified as AP
-import Data.Attoparsec.Text (Parser)
-import Data.Attoparsec.Text qualified as AP
 import Data.Bifunctor (Bifunctor (..))
-import Data.Char qualified as C
 import Data.Foldable qualified as F
-import Data.Functor ((<&>))
 import Data.List qualified as L
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -361,7 +355,7 @@ mkPackageVersionTH v = case mkPackageVersion v of
 -- >>> unsafePackageVersion [1,2]
 -- UnsafePackageVersion {unPackageVersion = *** Exception: PVP numbers must be at least A.B.C: [1, 2]
 -- CallStack (from HasCallStack):
---   error, called at src/Data/Version/Package.hs:368:32 in main:Data.Version.Package
+--   error, called at src/Data/Version/Package.hs:362:32 in main:Data.Version.Package
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion
@@ -602,9 +596,9 @@ packageVersionEitherIO fp = do
     Right contents -> foldr findVers noVersErr contents
   where
     noVersErr = Left $ RFVersionNotFoundErr fp
-    findVers line acc = case AP.parseOnly parser line of
-      Right vers -> either (Left . RFReadValidateErr) Right vers
-      _ -> acc
+    findVers line acc = case T.stripPrefix "version:" line of
+      Just rest -> first RFReadValidateErr $ fromText (T.strip rest)
+      Nothing -> acc
 
 #if MIN_VERSION_template_haskell(2, 17, 0)
 ioToTH :: Lift b => (a -> IO b) -> a -> Code Q b
@@ -613,18 +607,6 @@ ioToTH f x = TH.bindCode (TH.runIO (f x)) liftTyped
 ioToTH :: Lift b => (a -> IO b) -> a -> Q (TExp b)
 ioToTH f x = TH.runIO (f x) >>= liftTyped
 #endif
-
-parser :: Parser (Either ReadValidateError PackageVersion)
-parser =
-  AP.string "version:"
-    *> AP.skipSpace
-    *> parseVers
-    <&> (>>= first RVValidateErr . mkPackageVersion)
-  where
-    parseVers = first RVReadStrErr . traverse (TR.readEither . T.unpack) <$> AP.many1 parseDigits
-    parseDigits =
-      AP.takeWhile1 C.isDigit
-        <* A.many (AP.string ".")
 
 #if MIN_VERSION_base(4, 15, 0)
 readFile' :: FilePath -> IO String

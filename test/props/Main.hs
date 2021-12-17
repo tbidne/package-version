@@ -14,7 +14,7 @@ import Test.Tasty qualified as Tasty
 import Test.Tasty.Options (OptionDescription (..))
 import Text.Read qualified as TR
 
--- | Runs property tests. THe environment variable @MAX_RUNS@ controls
+-- | Runs property tests. The environment variable @MAX_RUNS@ controls
 -- how many test runs we do (default 100).
 --
 -- @since 0.1.0.0

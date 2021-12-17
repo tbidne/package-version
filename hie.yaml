@@ -3,6 +3,9 @@ cradle:
     - path: "./src"
       component: "lib:package-version"
 
+    - path: "./test/unit"
+      component: "package-version:test:unit"
+
     - path: "./test/props"
       component: "package-version:test:props"
 

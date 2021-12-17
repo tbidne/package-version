@@ -31,5 +31,8 @@ jobs:
       - name: Compile
         run: nix develop --command cabal build
 
+      - name: Unit Tests
+        run: nix develop --command cabal test unit
+
       - name: Property Tests
         run: nix develop --command cabal test props

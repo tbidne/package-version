@@ -281,7 +281,7 @@ packageVersionTextTH :: FilePath -> Q (TExp Text)
 packageVersionTextTH = ioToTH packageVersionTextIO
 
 -- | Version of 'packageVersionEitherIO' that throws an
--- 'Control.Exception.SafeException' if any errors are encountered.
+-- 'Control.Exception.Safe.Exception' if any errors are encountered.
 --
 -- ==== __Examples__
 -- >>> packageVersionThrowIO "package-version.cabal"

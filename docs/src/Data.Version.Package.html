@@ -444,7 +444,7 @@ forall b a. Lift b =&gt; (a -&gt; IO b) -&gt; a -&gt; Q (TExp b)
 </span><a href="Data.Version.Package.html#packageVersionTextIO"><span class="hs-identifier hs-var">packageVersionTextIO</span></a></span><span>
 </span><span id="line-282"></span><span>
 </span><span id="line-283"></span><span class="hs-comment">-- | Version of 'packageVersionEitherIO' that throws an</span><span>
-</span><span id="line-284"></span><span class="hs-comment">-- 'Control.Exception.SafeException' if any errors are encountered.</span><span>
+</span><span id="line-284"></span><span class="hs-comment">-- 'Control.Exception.Safe.Exception' if any errors are encountered.</span><span>
 </span><span id="line-285"></span><span class="hs-comment">--</span><span>
 </span><span id="line-286"></span><span class="hs-comment">-- ==== __Examples__</span><span>
 </span><span id="line-287"></span><span class="hs-comment">-- &gt;&gt;&gt; packageVersionThrowIO &quot;package-version.cabal&quot;</span><span>

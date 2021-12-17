@@ -10,6 +10,7 @@ import System.Environment qualified as Env
 import System.Exit qualified as SysEx
 import Test.Tasty qualified as Tasty
 import Test.Tasty.Options (OptionDescription (..))
+import Tests.ListInt qualified
 import Tests.Text qualified
 import Tests.Version qualified
 import Text.Read qualified as TR
@@ -29,7 +30,8 @@ main = do
 
   let maxRunProps =
         Tasty.localOption (MkMaxRuns maxRuns)
-          <$> [ Tests.Text.props,
+          <$> [ Tests.ListInt.props,
+                Tests.Text.props,
                 Tests.Version.props
               ]
 

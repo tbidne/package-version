@@ -82,6 +82,7 @@ test-suite props
   other-modules:
     Gens
     MaxRuns
+    Tests.ListInt
     Tests.Text
     Tests.Version
 

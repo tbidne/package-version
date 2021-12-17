@@ -17,12 +17,18 @@ tests :: TestTree
 tests =
   Tasty.testGroup
     "TH tests"
-    [ thSuccess,
+    [ listIntTHSuccess,
+      thSuccess,
       stringTHSuccess,
       stringTHFailure,
       textTHSuccess,
       textTHFailure
     ]
+
+listIntTHSuccess :: TestTree
+listIntTHSuccess = THU.testCase "mkPackageVersionTH creates PackageVersion" $ do
+  let version = $$(PV.mkPackageVersionTH [0, 1, 0, 0])
+  UnsafePackageVersion [0, 1, 0, 0] @=? version
 
 thSuccess :: TestTree
 thSuccess = THU.testCase "packageVersionTH retrieves version" $ do

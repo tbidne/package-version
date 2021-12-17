@@ -17,6 +17,11 @@ module Gens
     genValidVersion,
     genShortVersion,
     genNegativeVersion,
+
+    -- * List Int
+    genValidListInt,
+    genShortListInt,
+    genNegativeListInt,
   )
 where
 
@@ -115,6 +120,33 @@ genNegativeVersion = do
   tags <- genTags
   shuffled <- HG.shuffle (invalid : valid)
   pure $ Version shuffled tags
+  where
+    genVers = HG.list (HR.constant 3 100) genSingleVersNum
+
+-- | Generates a valid 'PackageVersion' List 'Int'.
+--
+-- @since 0.1.0.0
+genValidListInt :: MonadGen m => m [Int]
+genValidListInt = genVers
+  where
+    genVers = HG.list (HR.exponential 3 10_000) genSingleVersNum
+
+-- | Generates an invalid 'PackageVersion' List 'Int' that is too short.
+--
+-- @since 0.1.0.0
+genShortListInt :: MonadGen m => m [Int]
+genShortListInt = genVers
+  where
+    genVers = HG.list (HR.constant 0 2) genSingleVersNum
+
+-- | Generates an invalid 'PackageVersion' List 'Int' that includes a negative.
+--
+-- @since 0.1.0.0
+genNegativeListInt :: MonadGen m => m [Int]
+genNegativeListInt = do
+  valid <- genVers
+  invalid <- HG.int (HR.constant (-9_999) (-1))
+  HG.shuffle (invalid : valid)
   where
     genVers = HG.list (HR.constant 3 100) genSingleVersNum
 

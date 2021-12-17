@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  cabal-8.10.7:
+  cabal_8-10-7:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -29,9 +29,16 @@ jobs:
              cabal build --write-ghc-environment-files=always"
 
       # Ensure the env vars are there for doctest
-      - name: Test
+      - name: DocTest
         run: |
           nix-shell nix/ghc_8-10-7.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
-             RUN_DOCTEST=true cabal test --test-show-details=direct"
+             RUN_DOCTEST=true cabal test doctest --test-show-details=direct"
+
+      - name: Property Tests
+        run: |
+          nix-shell nix/ghc_8-10-7.nix --command \
+            "cabal update && \
+             cabal build --write-ghc-environment-files=always && \
+             MAX_RUNS=1000 cabal test props --test-show-details=direct"

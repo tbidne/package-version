@@ -26,6 +26,9 @@ jobs:
 
       - name: Compile
         run: stack build --ghc-options="-Werror"
-      
-      - name: Test
-        run: RUN_DOCTEST=true stack test
+
+      - name: DocTest
+        run: RUN_DOCTEST=true stack test doctest
+
+      - name: DocTest
+        run: MAX_RUNS=10000 stack test props

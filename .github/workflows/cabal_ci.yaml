@@ -8,7 +8,7 @@ on:
   pull_request:
     branches:
       - main
-  
+
   workflow_dispatch:
 
 jobs:
@@ -30,6 +30,6 @@ jobs:
 
       - name: Compile
         run: nix develop --command cabal build
-      
-      - name: Test
-        run: nix develop --command cabal test
+
+      - name: Property Tests
+        run: nix develop --command cabal test props

@@ -7,6 +7,7 @@ any_failed=0
 ran_test=0
 for f in "${files[@]}"; do
     ormolu \
+      --ghc-opt -XBangPatterns \
       --ghc-opt -XImportQualifiedPost \
       --ghc-opt -XTypeApplications \
       --ghc-opt -XPatternSynonyms \

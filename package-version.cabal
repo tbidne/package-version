@@ -30,15 +30,21 @@ common common-exts
     DeriveGeneric
     DeriveLift
     DerivingStrategies
+    DerivingVia
     ImportQualifiedPost
+    LambdaCase
+    NumericUnderscores
     OverloadedStrings
     PatternSynonyms
     ScopedTypeVariables
     TypeApplications
 
 library
-  import: common-exts
-  exposed-modules:  Data.Version.Package
+  import:           common-exts
+  exposed-modules:
+    Data.Version.Package
+    Data.Version.Package.Internal
+
   build-depends:
     , base              >=4.14.1.0 && <4.17
     , deepseq           ^>=1.4.4.0
@@ -50,8 +56,30 @@ library
   hs-source-dirs:   src
   default-language: Haskell2010
 
+test-suite props
+  import:           common-exts
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+    Gens
+    MaxRuns
+    Props.Text
+    Props.Version
+
+  build-depends:
+    , base
+    , hedgehog         ^>=1.0.2
+    , package-version
+    , tagged           ^>=0.8.6
+    , tasty            >=1.1.0.3 && <1.5
+    , tasty-hedgehog   ==1.1.0.0
+    , text
+
+  hs-source-dirs:   test/props
+  default-language: Haskell2010
+
 test-suite doctest
-  import: common-exts
+  import:           common-exts
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   build-depends:

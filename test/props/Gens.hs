@@ -62,7 +62,7 @@ genValidText = T.pack <$> genValidString
 genShortString :: MonadGen m => m String
 genShortString = L.intercalate "." <$> genVers
   where
-    genVers = HG.list (HR.constant 0 2) genSingleVersNumStr
+    genVers = HG.list (HR.constant 0 1) genSingleVersNumStr
 
 -- | Generates an invalid 'PackageVersion' 'Text' that is too short.
 --
@@ -108,7 +108,7 @@ genValidVersion = Version <$> genVers <*> genTags
 genShortVersion :: MonadGen m => m Version
 genShortVersion = Version <$> genVers <*> genTags
   where
-    genVers = HG.list (HR.constant 0 2) genSingleVersNum
+    genVers = HG.list (HR.constant 0 1) genSingleVersNum
 
 -- | Generates an invalid 'PackageVersion' 'Version' that includes negatives.
 --
@@ -137,7 +137,7 @@ genValidListInt = genVers
 genShortListInt :: MonadGen m => m [Int]
 genShortListInt = genVers
   where
-    genVers = HG.list (HR.constant 0 2) genSingleVersNum
+    genVers = HG.list (HR.constant 0 1) genSingleVersNum
 
 -- | Generates an invalid 'PackageVersion' List 'Int' that includes a negative.
 --

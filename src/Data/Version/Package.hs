@@ -156,8 +156,8 @@ fromVersion = Internal.mkPackageVersion . versionBranch
 -- >>> fromString "1.2."
 -- Left (RsReadStrErr "Prelude.read: no parse")
 --
--- >>> fromString "1.3"
--- Left (RsValidateErr (VTooShortErr [1,3]))
+-- >>> fromString "1"
+-- Left (RsValidateErr (VTooShortErr [1]))
 --
 -- >>> fromString "-3.1.2"
 -- Left (RsValidateErr (VNegativeErr (-3)))
@@ -185,8 +185,8 @@ fromString = fromText . T.pack
 -- >>> fromText "1.2."
 -- Left (RsReadStrErr "Prelude.read: no parse")
 --
--- >>> fromText "1.3"
--- Left (RsValidateErr (VTooShortErr [1,3]))
+-- >>> fromText "1"
+-- Left (RsValidateErr (VTooShortErr [1]))
 --
 -- >>> fromText "-3.1.2"
 -- Left (RsValidateErr (VNegativeErr (-3)))

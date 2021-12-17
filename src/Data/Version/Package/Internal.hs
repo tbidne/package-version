@@ -37,7 +37,7 @@ import Text.Read qualified as TR
 -- @['Int']@) except:
 --
 -- 1. 'PackageVersion' has no 'Data.Version.versionTags'.
--- 2. We enforce PVP's "tags must be at least A.B.C" invariant via the
+-- 2. We enforce PVP's "tags must be at least A.B" invariant via the
 --    smart-constructor pattern.
 -- 3. Trailing zeroes are ignored in 'Eq', 'Ord', 'Semigroup', and 'Monoid'.
 --
@@ -45,7 +45,7 @@ import Text.Read qualified as TR
 -- In particular, the 'Monoid' identity is
 --
 -- @
--- [0] = { [0,0,0], [0,0,0,0], ... }
+-- [0] = { [0,0], [0,0,0], ... }
 -- @
 --
 -- and its 'Semigroup' instance takes the greatest version (based on 'Ord').
@@ -70,13 +70,13 @@ import Text.Read qualified as TR
 -- >>> UnsafePackageVersion [5,6,0] <> UnsafePackageVersion [9,0,0]
 -- UnsafePackageVersion {unPackageVersion = [9,0,0]}
 --
--- >>> UnsafePackageVersion [9,0,0] <> UnsafePackageVersion [9,0,0,0]
--- UnsafePackageVersion {unPackageVersion = [9,0,0]}
+-- >>> UnsafePackageVersion [0,9] <> UnsafePackageVersion [0,9,0,0]
+-- UnsafePackageVersion {unPackageVersion = [0,9]}
 --
 -- >>> TR.readEither @PackageVersion "UnsafePackageVersion {unPackageVersion = [3,2,1]}"
 -- Right (UnsafePackageVersion {unPackageVersion = [3,2,1]})
 --
--- >>> TR.readEither @PackageVersion "UnsafePackageVersion {unPackageVersion = [3,2]}"
+-- >>> TR.readEither @PackageVersion "UnsafePackageVersion {unPackageVersion = [3]}"
 -- Left "Prelude.read: no parse"
 --
 -- @since 0.1.0.0
@@ -116,7 +116,7 @@ instance Semigroup PackageVersion where
 
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where
-  mempty = UnsafePackageVersion [0, 0, 0]
+  mempty = UnsafePackageVersion [0, 0]
 
 -- | Derived by GHC 8.10.7 with validation via 'mkPackageVersion'.
 --
@@ -152,7 +152,7 @@ dropTrailingZeroes xs = take (lastNonZero xs) xs
 --
 -- @since 0.1.0.0
 data ValidationError
-  = -- | PVP version numbers must be at least A.B.C
+  = -- | PVP version numbers must be at least A.B
     --
     -- @since 0.1.0.0
     VTooShortErr [Int]
@@ -175,7 +175,7 @@ data ValidationError
 
 -- | @since 0.1.0.0
 instance Pretty ValidationError where
-  pretty (VTooShortErr xs) = pretty @Text "PVP numbers must be at least A.B.C:" <+> pretty xs
+  pretty (VTooShortErr xs) = pretty @Text "PVP numbers must be at least A.B:" <+> pretty xs
   pretty (VNegativeErr i) = pretty @Text "PVP numbers cannot be negative:" <+> pretty i
 
 -- | Errors that can occur when reading PVP version numbers.
@@ -257,15 +257,15 @@ instance Pretty ReadFileError where
 -- >>> mkPackageVersion [1,2,-3,-4,5]
 -- Left (VNegativeErr (-3))
 --
--- >>> mkPackageVersion [3,2]
--- Left (VTooShortErr [3,2])
+-- >>> mkPackageVersion [3]
+-- Left (VTooShortErr [3])
 --
 -- >>> mkPackageVersion []
 -- Left (VTooShortErr [])
 --
 -- @since 0.1.0.0
 mkPackageVersion :: [Int] -> Either ValidationError PackageVersion
-mkPackageVersion v@(_ : _ : _ : _) = case filter (< 0) v of
+mkPackageVersion v@(_ : _ : _) = case filter (< 0) v of
   [] -> Right $ UnsafePackageVersion v
   (neg : _) -> Left $ VNegativeErr neg
 mkPackageVersion short = Left $ VTooShortErr short

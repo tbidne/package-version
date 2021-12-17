@@ -82,8 +82,8 @@ test-suite props
   other-modules:
     Gens
     MaxRuns
-    Props.Text
-    Props.Version
+    Tests.Text
+    Tests.Version
 
   build-depends:
     , base

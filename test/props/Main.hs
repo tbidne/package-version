@@ -6,12 +6,12 @@ module Main (main) where
 import Control.Monad qualified as M
 import Data.Proxy (Proxy (..))
 import MaxRuns (MaxRuns (..))
-import Props.Text qualified
-import Props.Version qualified
 import System.Environment qualified as Env
 import System.Exit qualified as SysEx
 import Test.Tasty qualified as Tasty
 import Test.Tasty.Options (OptionDescription (..))
+import Tests.Text qualified
+import Tests.Version qualified
 import Text.Read qualified as TR
 
 -- | Runs property tests. The environment variable @MAX_RUNS@ controls
@@ -29,8 +29,8 @@ main = do
 
   let maxRunProps =
         Tasty.localOption (MkMaxRuns maxRuns)
-          <$> [ Props.Text.props,
-                Props.Version.props
+          <$> [ Tests.Text.props,
+                Tests.Version.props
               ]
 
   Tasty.defaultMainWithIngredients ingredients $

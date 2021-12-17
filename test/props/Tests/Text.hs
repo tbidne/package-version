@@ -1,7 +1,7 @@
 -- | Properties for 'String' and 'Text'.
 --
 -- @since 0.1.0.0
-module Props.Text (props) where
+module Tests.Text (props) where
 
 import Data.Either qualified as Either
 import Data.Version.Package (ReadStringError (..), ValidationError (..))

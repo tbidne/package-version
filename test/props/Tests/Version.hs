@@ -1,7 +1,7 @@
 -- | Properties for 'Version'.
 --
 -- @since 0.1.0.0
-module Props.Version (props) where
+module Tests.Version (props) where
 
 import Data.Either qualified as Either
 import Data.Version.Package (ValidationError (..))

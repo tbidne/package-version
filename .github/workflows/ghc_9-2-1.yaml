@@ -27,25 +27,3 @@ jobs:
           nix-shell nix/ghc_9-2-1.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always"
-
-      # Ensure the env vars are there for doctest
-      - name: DocTest
-        run: |
-          nix-shell nix/ghc_9-2-1.nix --command \
-            "cabal update && \
-             cabal build --write-ghc-environment-files=always && \
-             RUN_DOCTEST=true cabal test doctest --test-show-details=direct"
-
-      - name: Unit Tests
-        run: |
-          nix-shell nix/ghc_9-2-1.nix --command \
-            "cabal update && \
-             cabal build --write-ghc-environment-files=always && \
-             cabal test unit --test-show-details=direct"
-
-      - name: Property Tests
-        run: |
-          nix-shell nix/ghc_9-2-1.nix --command \
-            "cabal update && \
-             cabal build --write-ghc-environment-files=always && \
-             MAX_RUNS=1000 cabal test props --test-show-details=direct"

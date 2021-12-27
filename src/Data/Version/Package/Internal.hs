@@ -244,12 +244,12 @@ instance Pretty ReadFileError where
   pretty (RfReadValidateErr i) = pretty @Text "Read/validation error:" <+> pretty i
 
 -- | Smart constructor for 'PackageVersion'. The length of the list must be
--- > 2 to match PVP's minimal A.B.C. Furthermore, all digits must be non-negative.
+-- > 1 to match PVP's minimal A.B. Furthermore, all digits must be non-negative.
 --
 -- ==== __Examples__
 --
--- >>> mkPackageVersion [1,2,3]
--- Right (UnsafePackageVersion {unPackageVersion = [1,2,3]})
+-- >>> mkPackageVersion [1,2]
+-- Right (UnsafePackageVersion {unPackageVersion = [1,2]})
 --
 -- >>> mkPackageVersion [2,87,7,1]
 -- Right (UnsafePackageVersion {unPackageVersion = [2,87,7,1]})

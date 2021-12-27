@@ -123,7 +123,7 @@ unsafePackageVersion = either (error . prettyErr) id . Internal.mkPackageVersion
 -- | Creates a 'PackageVersion' from 'Version'.
 --
 -- Note: Because 'PackageVersion' does not have a 'versionTags', 'fromVersion'
--- is not injective even on "well-formed" 'Version's (i.e. non-negative and length > 2).
+-- is not injective even on "well-formed" 'Version's (i.e. non-negative and length > 1).
 -- That is, @'toVersion' . 'fromVersion'@ is /not/ an isomorphism.
 --
 -- ==== __Examples__

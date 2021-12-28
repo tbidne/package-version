@@ -2,7 +2,7 @@
 
 # Package Version
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tbidne/package-version?sort=semver)](https://github.com/tbidne/package-version/releases/)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tbidne/package-version?include_prereleases&sort=semver)](https://github.com/tbidne/package-version/releases/)
 [![Hackage](https://img.shields.io/hackage/v/package-version)](https://hackage.haskell.org/package/package-version)
 [![Hackage Deps](https://img.shields.io/hackage-deps/v/package-version)](http://packdeps.haskellers.com/reverse/package-version)
 [![Hackage CI](https://matrix.hackage.haskell.org/api/v2/packages/package-version/badge)](https://matrix.hackage.haskell.org/#/package/package-version)

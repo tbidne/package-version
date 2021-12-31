@@ -20,7 +20,7 @@ jobs:
       - name: Setup nix
         uses: cachix/install-nix-action@v12
         with:
-          nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/ac169ec6371f0d835542db654a65e0f2feb07838.tar.gz
+          nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/5b091d4fbe3b7b7493c3b46fe0842e4b30ea24b3.tar.gz
 
       - name: Compile
         run: |

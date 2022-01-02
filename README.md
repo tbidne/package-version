@@ -9,7 +9,7 @@
 [![Cabal CI](https://img.shields.io/github/workflow/status/tbidne/package-version/cabal/main?label=cabal&logoColor=white)](https://github.com/tbidne/package-version/actions/workflows/cabal_ci.yaml)
 [![Stack CI](https://img.shields.io/github/workflow/status/tbidne/package-version/stack/main?label=stack&logoColor=white)](https://github.com/tbidne/package-version/actions/workflows/stack_ci.yaml)
 [![Nix CI](https://img.shields.io/github/workflow/status/tbidne/package-version/nix/main?label=nix&logo=nixos&logoColor=white)](https://github.com/tbidne/package-version/actions/workflows/nix_ci.yaml)
-[![MIT](https://img.shields.io/github/license/tbidne/package-version?color=blue)](https://opensource.org/licenses/MIT)
+[![BSD-3-Clause](https://img.shields.io/github/license/tbidne/package-version?color=blue)](https://opensource.org/licenses/BSD-3-Clause)
 
 </div>
 

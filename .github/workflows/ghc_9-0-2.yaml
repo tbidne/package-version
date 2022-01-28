@@ -1,4 +1,4 @@
-name: "9.0.1"
+name: "9.0.2"
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  cabal_9-0-1:
+  cabal_9-0-2:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,32 +20,32 @@ jobs:
       - name: Setup nix
         uses: cachix/install-nix-action@v12
         with:
-          nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/5b091d4fbe3b7b7493c3b46fe0842e4b30ea24b3.tar.gz
+          nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/945ec499041db73043f745fad3b2a3a01e826081.tar.gz
 
       - name: Compile
         run: |
-          nix-shell nix/ghc_9-0-1.nix --command \
+          nix-shell nix/ghc_9-0-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always"
 
       # Ensure the env vars are there for doctest
       - name: DocTest
         run: |
-          nix-shell nix/ghc_9-0-1.nix --command \
+          nix-shell nix/ghc_9-0-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
              RUN_DOCTEST=true cabal test doctest --test-show-details=direct"
 
       - name: Unit Tests
         run: |
-          nix-shell nix/ghc_9-0-1.nix --command \
+          nix-shell nix/ghc_9-0-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
              cabal test unit --test-show-details=direct"
 
       - name: Property Tests
         run: |
-          nix-shell nix/ghc_9-0-1.nix --command \
+          nix-shell nix/ghc_9-0-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
              MAX_RUNS=1000 cabal test props --test-show-details=direct"

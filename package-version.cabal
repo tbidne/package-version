@@ -3,7 +3,7 @@ name:               package-version
 version:            0.1.0.0
 license:            BSD-3-Clause
 license-file:       LICENSE
-tested-with:        GHC ==8.10.7 || ==9.0.1 || ==9.2.1
+tested-with:        GHC ==8.10.7 || ==9.0.2 || ==9.2.1
 copyright:          2021 Thomas Bidne
 author:             Thomas Bidne
 maintainer:         tbidne@prontonmail.com
@@ -88,7 +88,7 @@ test-suite props
 
   build-depends:
     , base
-    , hedgehog         ^>=1.0.2
+    , hedgehog         >=1.0.2   && <1.2
     , package-version
     , tagged           ^>=0.8.6
     , tasty

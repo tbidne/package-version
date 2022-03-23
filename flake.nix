@@ -10,7 +10,7 @@
     flake-utils.lib.eachSystem [ "x86_64-linux" "x86_64-darwin" ] (system:
     let
       pkgs = import nixpkgs { inherit system; };
-      compilerVersion = "ghc8107";
+      compilerVersion = "ghc921";
       compiler = pkgs.haskell.packages."${compilerVersion}";
       mkPkg = returnShellEnv:
         compiler.developPackage {
@@ -19,13 +19,9 @@
           root = ./.;
           modifier = drv:
             pkgs.haskell.lib.addBuildTools drv (with pkgs.haskellPackages; [
-              cabal-fmt
               cabal-install
-              cabal-plan
               haskell-language-server
-              hlint
               ghcid
-              implicit-hie
               ormolu
               pkgs.nixpkgs-fmt
               pkgs.zlib

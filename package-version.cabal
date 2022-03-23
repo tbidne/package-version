@@ -84,6 +84,7 @@ test-suite props
     Tests.ListInt
     Tests.Text
     Tests.Version
+    Utils
 
   build-depends:
     , base
@@ -91,7 +92,7 @@ test-suite props
     , package-version
     , tagged           ^>=0.8.6
     , tasty
-    , tasty-hedgehog   >=1.0.0.2 && <1.2
+    , tasty-hedgehog   >=1.0.0.2 && <1.3
     , text
 
   hs-source-dirs:   test/props

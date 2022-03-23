@@ -11,7 +11,7 @@ import Hedgehog qualified as H
 import MaxRuns (MaxRuns (..))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
-import Test.Tasty.Hedgehog qualified as TH
+import Utils qualified
 
 -- | @since 0.1.0.0
 props :: TestTree
@@ -25,7 +25,7 @@ props =
 
 validListIntSucceeds :: TestTree
 validListIntSucceeds = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Valid List Int is decoded" $
+  Utils.testPropertyCompat "Valid List Int is decoded" "validListIntSucceeds" $
     H.withTests limit $
       H.property $ do
         vs <- H.forAll Gens.genValidListInt
@@ -33,7 +33,7 @@ validListIntSucceeds = T.askOption $ \(MkMaxRuns limit) ->
 
 shortListIntFails :: TestTree
 shortListIntFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Short List Int is not decoded" $
+  Utils.testPropertyCompat "Short List Int is not decoded" "shortListIntFails" $
     H.withTests limit $
       H.property $ do
         vs <- H.forAll Gens.genShortListInt
@@ -43,7 +43,7 @@ shortListIntFails = T.askOption $ \(MkMaxRuns limit) ->
 
 negativeListIntFails :: TestTree
 negativeListIntFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Negative List Int is not decoded" $
+  Utils.testPropertyCompat "Negative List Int is not decoded" "negativeListIntFails" $
     H.withTests limit $
       H.property $ do
         vs <- H.forAll Gens.genNegativeListInt

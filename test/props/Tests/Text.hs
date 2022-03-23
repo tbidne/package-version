@@ -12,7 +12,7 @@ import Hedgehog qualified as H
 import MaxRuns (MaxRuns (..))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
-import Test.Tasty.Hedgehog qualified as TH
+import Utils qualified
 
 -- | @since 0.1.0.0
 props :: TestTree
@@ -30,7 +30,7 @@ props =
 
 toTextRoundTrip :: TestTree
 toTextRoundTrip = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "PackageVersion -> Text -> PackageVersion is a round trip" $
+  Utils.testPropertyCompat "PackageVersion -> Text -> PackageVersion is a round trip" "toTextRoundTrip" $
     H.withTests limit $
       H.property $ do
         pv <- H.forAll Gens.genPackageVersion
@@ -40,7 +40,7 @@ toTextRoundTrip = T.askOption $ \(MkMaxRuns limit) ->
 
 validStrSucceeds :: TestTree
 validStrSucceeds = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Valid String is decoded" $
+  Utils.testPropertyCompat "Valid String is decoded" "validStrSucceeds" $
     H.withTests limit $
       H.property $ do
         str <- H.forAll Gens.genValidString
@@ -48,7 +48,7 @@ validStrSucceeds = T.askOption $ \(MkMaxRuns limit) ->
 
 validTextSucceeds :: TestTree
 validTextSucceeds = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Valid Text is decoded" $
+  Utils.testPropertyCompat "Valid Text is decoded" "validTextSucceeds" $
     H.withTests limit $
       H.property $ do
         txt <- H.forAll Gens.genValidText
@@ -56,7 +56,7 @@ validTextSucceeds = T.askOption $ \(MkMaxRuns limit) ->
 
 shortStringFails :: TestTree
 shortStringFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Short String is not decoded" $
+  Utils.testPropertyCompat "Short String is not decoded" "shortStringFails" $
     H.withTests limit $
       H.property $ do
         str <- H.forAll Gens.genShortString
@@ -67,7 +67,7 @@ shortStringFails = T.askOption $ \(MkMaxRuns limit) ->
 
 shortTextFails :: TestTree
 shortTextFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Short Text is not decoded" $
+  Utils.testPropertyCompat "Short Text is not decoded" "shortTextFails" $
     H.withTests limit $
       H.property $ do
         txt <- H.forAll Gens.genShortText
@@ -78,7 +78,7 @@ shortTextFails = T.askOption $ \(MkMaxRuns limit) ->
 
 negativeStringFails :: TestTree
 negativeStringFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Negative String is not decoded" $
+  Utils.testPropertyCompat "Negative String is not decoded" "negativeStringFails" $
     H.withTests limit $
       H.property $ do
         str <- H.forAll Gens.genNegativeStr
@@ -88,7 +88,7 @@ negativeStringFails = T.askOption $ \(MkMaxRuns limit) ->
 
 negativeTextFails :: TestTree
 negativeTextFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Negative Text is not decoded" $
+  Utils.testPropertyCompat "Negative Text is not decoded" "negativeTextFails" $
     H.withTests limit $
       H.property $ do
         txt <- H.forAll Gens.genNegativeText

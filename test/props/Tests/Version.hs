@@ -11,7 +11,7 @@ import Hedgehog qualified as H
 import MaxRuns (MaxRuns (..))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
-import Test.Tasty.Hedgehog qualified as TH
+import Utils qualified
 
 -- | @since 0.1.0.0
 props :: TestTree
@@ -25,7 +25,7 @@ props =
 
 validVersionSucceeds :: TestTree
 validVersionSucceeds = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Valid Version is decoded" $
+  Utils.testPropertyCompat "Valid Version is decoded" "validVersionSucceeds" $
     H.withTests limit $
       H.property $ do
         vs <- H.forAll Gens.genValidVersion
@@ -33,7 +33,7 @@ validVersionSucceeds = T.askOption $ \(MkMaxRuns limit) ->
 
 shortVersionFails :: TestTree
 shortVersionFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Short Version is not decoded" $
+  Utils.testPropertyCompat "Short Version is not decoded" "shortVersionFails" $
     H.withTests limit $
       H.property $ do
         vs <- H.forAll Gens.genShortVersion
@@ -43,7 +43,7 @@ shortVersionFails = T.askOption $ \(MkMaxRuns limit) ->
 
 negativeVersionFails :: TestTree
 negativeVersionFails = T.askOption $ \(MkMaxRuns limit) ->
-  TH.testProperty "Negative Version is not decoded" $
+  Utils.testPropertyCompat "Negative Version is not decoded" "negativeVersionFails" $
     H.withTests limit $
       H.property $ do
         vs <- H.forAll Gens.genNegativeVersion

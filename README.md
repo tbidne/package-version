@@ -5,11 +5,15 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tbidne/package-version?include_prereleases&sort=semver)](https://github.com/tbidne/package-version/releases/)
 [![Hackage](https://img.shields.io/hackage/v/package-version)](https://hackage.haskell.org/package/package-version)
 [![Hackage Deps](https://img.shields.io/hackage-deps/v/package-version)](http://packdeps.haskellers.com/reverse/package-version)
-[![Hackage CI](https://matrix.hackage.haskell.org/api/v2/packages/package-version/badge)](https://matrix.hackage.haskell.org/#/package/package-version)
-[![Cabal CI](https://img.shields.io/github/workflow/status/tbidne/package-version/cabal/main?label=cabal&logoColor=white)](https://github.com/tbidne/package-version/actions/workflows/cabal_ci.yaml)
-[![Stack CI](https://img.shields.io/github/workflow/status/tbidne/package-version/stack/main?label=stack&logoColor=white)](https://github.com/tbidne/package-version/actions/workflows/stack_ci.yaml)
-[![Nix CI](https://img.shields.io/github/workflow/status/tbidne/package-version/nix/main?label=nix&logo=nixos&logoColor=white)](https://github.com/tbidne/package-version/actions/workflows/nix_ci.yaml)
 [![BSD-3-Clause](https://img.shields.io/github/license/tbidne/package-version?color=blue)](https://opensource.org/licenses/BSD-3-Clause)
+
+[![nix](https://img.shields.io/github/workflow/status/tbidne/package-version/nix/main?label=nix&logo=nixos&logoColor=85c5e7&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/nix_ci.yaml)
+[![stack](https://img.shields.io/github/workflow/status/tbidne/package-version/stack/main?label=stack%20nightly-2022-03-23&logoColor=white&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/stack_ci.yaml)
+[![style](https://img.shields.io/github/workflow/status/tbidne/package-version/style/main?label=style&logoColor=white&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/style_ci.yaml)
+
+[![8.10.7](https://img.shields.io/github/workflow/status/tbidne/package-version/8.10.7/main?label=8.10.7&logo=haskell&logoColor=904d8c&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/ghc_8-10-7.yaml)
+[![9.0.2](https://img.shields.io/github/workflow/status/tbidne/package-version/9.0.2/main?label=9.0.2&logo=haskell&logoColor=904d8c&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/ghc_9.0.2.yaml)
+[![9.2.1](https://img.shields.io/github/workflow/status/tbidne/package-version/9.2.1/main?label=9.2.1&logo=haskell&logoColor=904d8c&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/ghc_9.2.1.yaml)
 
 </div>
 

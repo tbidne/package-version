@@ -22,8 +22,7 @@
               cabal-install
               haskell-language-server
               ghcid
-              ormolu
-              pkgs.nixpkgs-fmt
+              pkgs.gnumake
               pkgs.zlib
             ]);
         };

@@ -2,7 +2,7 @@
 
 # Package Version
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tbidne/package-version?include_prereleases&sort=semver)](https://github.com/tbidne/package-version/releases/)
+
 [![Hackage](https://img.shields.io/hackage/v/package-version)](https://hackage.haskell.org/package/package-version)
 [![BSD-3-Clause](https://img.shields.io/github/license/tbidne/package-version?color=blue)](https://opensource.org/licenses/BSD-3-Clause)
 

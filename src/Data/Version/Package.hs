@@ -52,6 +52,7 @@ module Data.Version.Package
   )
 where
 
+import Control.Exception.Safe (Exception (..))
 import Control.Exception.Safe qualified as SafeEx
 import Control.Monad ((>=>))
 import Data.Bifunctor (Bifunctor (..))
@@ -330,7 +331,7 @@ packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)
 packageVersionEitherIO fp = do
   eContents <- second T.lines <$> SafeEx.tryAny (readFile' fp)
   pure $ case eContents of
-    Left err -> Left $ ReadFileErrorFileNotFound $ show err
+    Left err -> Left $ ReadFileErrorGeneral $ displayException err
     Right contents -> foldr findVers noVersErr contents
   where
     noVersErr = Left $ ReadFileErrorVersionNotFound fp

@@ -35,7 +35,7 @@ throwIOFailure :: TestTree
 throwIOFailure = THU.testCase "packageVersionThrowIO throws exception" $ do
   eVersion <- SafeEx.try $ PV.packageVersionThrowIO "not-found.cabal"
   case eVersion of
-    Left (ReadFileErrorFileNotFound _) -> pure ()
+    Left (ReadFileErrorGeneral _) -> pure ()
     Left ex ->
       THU.assertFailure $
         "Received unexpected exception: " <> show ex
@@ -72,7 +72,7 @@ eitherIOFailure :: TestTree
 eitherIOFailure = THU.testCase "packageVersionEitherIO retrieves error" $ do
   eVersion <- PV.packageVersionEitherIO "not-found.cabal"
   case eVersion of
-    Left (ReadFileErrorFileNotFound _) -> pure ()
+    Left (ReadFileErrorGeneral _) -> pure ()
     Left ex ->
       THU.assertFailure $
         "Received unexpected error: " <> show ex

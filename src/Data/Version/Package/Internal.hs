@@ -223,10 +223,10 @@ instance Exception ReadStringError where
 --
 -- @since 0.1.0.0
 data ReadFileError
-  = -- | Error for missing file.
+  = -- | General error when reading a file.
     --
     -- @since 0.2
-    ReadFileErrorFileNotFound String
+    ReadFileErrorGeneral String
   | -- | Error for missing version.
     --
     -- @since 0.2
@@ -250,7 +250,7 @@ data ReadFileError
 
 -- | @since 0.1.0.0
 instance Pretty ReadFileError where
-  pretty (ReadFileErrorFileNotFound f) = pretty @Text "File not found:" <+> pretty f
+  pretty (ReadFileErrorGeneral f) = pretty @Text "File not found:" <+> pretty f
   pretty (ReadFileErrorVersionNotFound f) = pretty @Text "Version not found:" <+> pretty f
   pretty (ReadFileErrorReadString i) = pretty @Text "Read error:" <+> pretty i
 

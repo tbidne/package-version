@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Internal module. Exposes the invariant-breaking 'UnsafePackageVersion'
@@ -18,7 +17,7 @@ where
 
 import Control.DeepSeq (NFData (..))
 import Control.DeepSeq qualified as DS
-import Control.Exception.Safe (Exception)
+import Control.Exception.Safe (Exception (..))
 import Data.Foldable qualified as F
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -26,9 +25,11 @@ import GHC.Generics (Generic)
 import GHC.Read qualified as RD
 import Language.Haskell.TH.Syntax (Lift (..))
 #if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..), (<+>))
+import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty, (<+>))
+import Prettyprinter.Render.String (renderString)
 #else
-import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
+import Data.Text.Prettyprint.Doc (Pretty (..), defaultLayoutOptions, layoutPretty, (<+>))
+import Data.Text.Prettyprint.Doc.Render.String (renderString)
 #endif
 import Text.Read qualified as TR
 
@@ -168,15 +169,15 @@ data ValidationError
       -- | @since 0.1.0.0
       Show
     )
-  deriving anyclass
-    ( -- | @since 0.1.0.0
-      Exception
-    )
 
 -- | @since 0.1.0.0
 instance Pretty ValidationError where
   pretty (ValidationErrorTooShort xs) = pretty @Text "PVP numbers must be at least A.B:" <+> pretty xs
   pretty (ValidationErrorNegative i) = pretty @Text "PVP numbers cannot be negative:" <+> pretty i
+
+-- | @since 0.1.0.0
+instance Exception ValidationError where
+  displayException = renderString . layoutPretty defaultLayoutOptions . pretty
 
 -- | Errors that can occur when reading PVP version numbers.
 --
@@ -198,15 +199,15 @@ data ReadStringError
       -- | @since 0.1.0.0
       Show
     )
-  deriving anyclass
-    ( -- | @since 0.1.0.0
-      Exception
-    )
 
 -- | @since 0.1.0.0
 instance Pretty ReadStringError where
   pretty (ReadStringErrorParse err) = pretty @Text "Read error:" <+> pretty err
   pretty (ReadStringErrorValidate i) = pretty @Text "Validation error:" <+> pretty i
+
+-- | @since 0.1.0.0
+instance Exception ReadStringError where
+  displayException = renderString . layoutPretty defaultLayoutOptions . pretty
 
 -- | Errors that can occur when reading PVP version numbers from a file.
 --
@@ -232,16 +233,16 @@ data ReadFileError
       -- | @since 0.1.0.0
       Show
     )
-  deriving anyclass
-    ( -- | @since 0.1.0.0
-      Exception
-    )
 
 -- | @since 0.1.0.0
 instance Pretty ReadFileError where
   pretty (ReadFileErrorFileNotFound f) = pretty @Text "File not found:" <+> pretty f
   pretty (ReadFileErrorVersionNotFound f) = pretty @Text "Version not found:" <+> pretty f
   pretty (ReadFileErrorReadString i) = pretty @Text "Read error:" <+> pretty i
+
+-- | @since 0.1.0.0
+instance Exception ReadFileError where
+  displayException = renderString . layoutPretty defaultLayoutOptions . pretty
 
 -- | Smart constructor for 'PackageVersion'. The length of the list must be
 -- > 1 to match PVP's minimal A.B. Furthermore, all digits must be non-negative.

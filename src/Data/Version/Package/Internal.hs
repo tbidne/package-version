@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Internal module. Exposes the invariant-breaking 'UnsafePackageVersion'
@@ -170,6 +171,10 @@ data ValidationError
       -- | @since 0.1.0.0
       Show
     )
+  deriving anyclass
+    ( -- | @since 0.2
+      NFData
+    )
 
 -- | @since 0.1.0.0
 instance Pretty ValidationError where
@@ -199,6 +204,10 @@ data ReadStringError
       Generic,
       -- | @since 0.1.0.0
       Show
+    )
+  deriving anyclass
+    ( -- | @since 0.2
+      NFData
     )
 
 -- | @since 0.1.0.0
@@ -233,6 +242,10 @@ data ReadFileError
       Generic,
       -- | @since 0.1.0.0
       Show
+    )
+  deriving anyclass
+    ( -- | @since 0.2
+      NFData
     )
 
 -- | @since 0.1.0.0

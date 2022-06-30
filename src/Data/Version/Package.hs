@@ -52,20 +52,21 @@ module Data.Version.Package
   )
 where
 
-import Control.Exception.Safe (SomeException)
 import Control.Exception.Safe qualified as SafeEx
 import Control.Monad ((>=>))
 import Data.Bifunctor (Bifunctor (..))
+import Data.ByteString qualified as BS
 import Data.List qualified as L
 import Data.Text (Text)
 import Data.Text qualified as T
+import Data.Text.Encoding (decodeUtf8With)
+import Data.Text.Encoding.Error (lenientDecode)
 import Data.Version (Version (..))
 #if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
 import Prettyprinter qualified as Pretty
@@ -75,7 +76,6 @@ import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
 import Data.Text.Prettyprint.Doc qualified as Pretty
 import Data.Text.Prettyprint.Doc.Render.String qualified as PrettyS
 #endif
-
 import Data.Version.Package.Internal
   ( PackageVersion (..),
     ReadFileError (..),
@@ -85,7 +85,6 @@ import Data.Version.Package.Internal
 import Data.Version.Package.Internal qualified as Internal
 import Language.Haskell.TH qualified as TH
 import Language.Haskell.TH.Syntax (Lift (..))
-import System.IO qualified as IO
 import Text.Read qualified as TR
 
 -- $setup
@@ -338,8 +337,7 @@ packageVersionTextIO fp = do
 -- @since 0.1.0.0
 packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)
 packageVersionEitherIO fp = do
-  eContents :: Either SomeException [Text] <-
-    second (T.lines . T.pack) <$> SafeEx.try (readFile' fp)
+  eContents <- second T.lines <$> SafeEx.tryAny (readFile' fp)
   pure $ case eContents of
     Left err -> Left $ ReadFileErrorFileNotFound $ show err
     Right contents -> foldr findVers noVersErr contents
@@ -348,6 +346,7 @@ packageVersionEitherIO fp = do
     findVers line acc = case T.stripPrefix "version:" line of
       Just rest -> first ReadFileErrorReadString $ fromText (T.strip rest)
       Nothing -> acc
+    readFile' = fmap (decodeUtf8With lenientDecode) . BS.readFile
 
 #if MIN_VERSION_template_haskell(2, 17, 0)
 ioToTH :: Lift b => (a -> IO b) -> a -> Code Q b
@@ -355,16 +354,6 @@ ioToTH f x = TH.bindCode (TH.runIO (f x)) liftTyped
 #else
 ioToTH :: Lift b => (a -> IO b) -> a -> Q (TExp b)
 ioToTH f x = TH.runIO (f x) >>= liftTyped
-#endif
-
-#if MIN_VERSION_base(4, 15, 0)
-readFile' :: FilePath -> IO String
-readFile' = IO.readFile'
-#else
-readFile' :: FilePath -> IO String
-readFile' name = IO.withFile name IO.ReadMode hGetContents'
-  where
-    hGetContents' h = IO.hGetContents h >>= \s -> length s `seq` pure s
 #endif
 
 prettyErr :: Pretty a => a -> String

@@ -38,7 +38,7 @@ shortListIntFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         vs <- H.forAll Gens.genShortListInt
         case PV.mkPackageVersion vs of
-          Left (VTooShortErr _) -> H.success
+          Left (ValidationErrorTooShort _) -> H.success
           bad -> H.annotateShow bad *> H.failure
 
 negativeListIntFails :: TestTree
@@ -48,5 +48,5 @@ negativeListIntFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         vs <- H.forAll Gens.genNegativeListInt
         case PV.mkPackageVersion vs of
-          Left (VNegativeErr _) -> H.success
+          Left (ValidationErrorNegative _) -> H.success
           bad -> H.annotateShow bad *> H.failure

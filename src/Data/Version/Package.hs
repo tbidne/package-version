@@ -131,7 +131,7 @@ unsafePackageVersion = either (error . prettyErr) id . Internal.mkPackageVersion
 -- Right (UnsafePackageVersion {unPackageVersion = [2,13,0]})
 --
 -- >>> fromVersion (Version [] [])
--- Left (VTooShortErr [])
+-- Left (ValidationErrorTooShort [])
 --
 -- @since 0.1.0.0
 fromVersion :: Version -> Either ValidationError PackageVersion
@@ -145,22 +145,22 @@ fromVersion = Internal.mkPackageVersion . versionBranch
 -- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
 --
 -- >>> fromString ""
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromString "1.a.2"
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromString ".1.2"
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromString "1.2."
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromString "1"
--- Left (RsValidateErr (VTooShortErr [1]))
+-- Left (ReadStringErrorValidate (ValidationErrorTooShort [1]))
 --
 -- >>> fromString "-3.1.2"
--- Left (RsValidateErr (VNegativeErr (-3)))
+-- Left (ReadStringErrorValidate (ValidationErrorNegative (-3)))
 --
 -- @since 0.1.0.0
 fromString :: String -> Either ReadStringError PackageVersion
@@ -174,29 +174,29 @@ fromString = fromText . T.pack
 -- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
 --
 -- >>> fromText ""
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromText "1.a.2"
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromText ".1.2"
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromText "1.2."
--- Left (RsReadStrErr "Prelude.read: no parse")
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromText "1"
--- Left (RsValidateErr (VTooShortErr [1]))
+-- Left (ReadStringErrorValidate (ValidationErrorTooShort [1]))
 --
 -- >>> fromText "-3.1.2"
--- Left (RsValidateErr (VNegativeErr (-3)))
+-- Left (ReadStringErrorValidate (ValidationErrorNegative (-3)))
 --
 -- @since 0.1.0.0
 fromText :: Text -> Either ReadStringError PackageVersion
-fromText = readInts . splitDots >=> first RsValidateErr . Internal.mkPackageVersion
+fromText = readInts . splitDots >=> first ReadStringErrorValidate . Internal.mkPackageVersion
   where
     splitDots = T.split (== '.')
-    readInts = first RsReadStrErr . traverse (TR.readEither . T.unpack)
+    readInts = first ReadStringErrorParse . traverse (TR.readEither . T.unpack)
 
 -- | Creates a 'Version' with empty 'versionTags' from 'PackageVersion'.
 --
@@ -341,12 +341,12 @@ packageVersionEitherIO fp = do
   eContents :: Either SomeException [Text] <-
     second (T.lines . T.pack) <$> SafeEx.try (readFile' fp)
   pure $ case eContents of
-    Left err -> Left $ RfFileNotFoundErr $ show err
+    Left err -> Left $ ReadFileErrorFileNotFound $ show err
     Right contents -> foldr findVers noVersErr contents
   where
-    noVersErr = Left $ RfVersionNotFoundErr fp
+    noVersErr = Left $ ReadFileErrorVersionNotFound fp
     findVers line acc = case T.stripPrefix "version:" line of
-      Just rest -> first RfReadValidateErr $ fromText (T.strip rest)
+      Just rest -> first ReadFileErrorReadString $ fromText (T.strip rest)
       Nothing -> acc
 
 #if MIN_VERSION_template_haskell(2, 17, 0)

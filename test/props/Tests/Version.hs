@@ -38,7 +38,7 @@ shortVersionFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         vs <- H.forAll Gens.genShortVersion
         case PV.fromVersion vs of
-          Left (VTooShortErr _) -> H.success
+          Left (ValidationErrorTooShort _) -> H.success
           bad -> H.annotateShow bad *> H.failure
 
 negativeVersionFails :: TestTree
@@ -48,5 +48,5 @@ negativeVersionFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         vs <- H.forAll Gens.genNegativeVersion
         case PV.fromVersion vs of
-          Left (VNegativeErr _) -> H.success
+          Left (ValidationErrorNegative _) -> H.success
           bad -> H.annotateShow bad *> H.failure

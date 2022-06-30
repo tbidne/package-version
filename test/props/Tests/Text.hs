@@ -61,8 +61,8 @@ shortStringFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         str <- H.forAll Gens.genShortString
         case PV.fromString str of
-          Left (RsReadStrErr _) -> H.success
-          Left (RsValidateErr (VTooShortErr _)) -> H.success
+          Left (ReadStringErrorParse _) -> H.success
+          Left (ReadStringErrorValidate (ValidationErrorTooShort _)) -> H.success
           bad -> H.annotateShow bad *> H.failure
 
 shortTextFails :: TestTree
@@ -72,8 +72,8 @@ shortTextFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         txt <- H.forAll Gens.genShortText
         case PV.fromText txt of
-          Left (RsReadStrErr _) -> H.success
-          Left (RsValidateErr (VTooShortErr _)) -> H.success
+          Left (ReadStringErrorParse _) -> H.success
+          Left (ReadStringErrorValidate (ValidationErrorTooShort _)) -> H.success
           bad -> H.annotateShow bad *> H.failure
 
 negativeStringFails :: TestTree
@@ -83,7 +83,7 @@ negativeStringFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         str <- H.forAll Gens.genNegativeStr
         case PV.fromString str of
-          Left (RsValidateErr (VNegativeErr _)) -> H.success
+          Left (ReadStringErrorValidate (ValidationErrorNegative _)) -> H.success
           bad -> H.annotateShow bad *> H.failure
 
 negativeTextFails :: TestTree
@@ -93,5 +93,5 @@ negativeTextFails = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         txt <- H.forAll Gens.genNegativeText
         case PV.fromText txt of
-          Left (RsValidateErr (VNegativeErr _)) -> H.success
+          Left (ReadStringErrorValidate (ValidationErrorNegative _)) -> H.success
           bad -> H.annotateShow bad *> H.failure

@@ -154,12 +154,12 @@ dropTrailingZeroes xs = take (lastNonZero xs) xs
 data ValidationError
   = -- | PVP version numbers must be at least A.B
     --
-    -- @since 0.1.0.0
-    VTooShortErr [Int]
+    -- @since 0.2
+    ValidationErrorTooShort [Int]
   | -- | PVP version numbers cannot be negative.
     --
-    -- @since 0.1.0.0
-    VNegativeErr Int
+    -- @since 0.2
+    ValidationErrorNegative Int
   deriving stock
     ( -- | @since 0.1.0.0
       Eq,
@@ -175,21 +175,21 @@ data ValidationError
 
 -- | @since 0.1.0.0
 instance Pretty ValidationError where
-  pretty (VTooShortErr xs) = pretty @Text "PVP numbers must be at least A.B:" <+> pretty xs
-  pretty (VNegativeErr i) = pretty @Text "PVP numbers cannot be negative:" <+> pretty i
+  pretty (ValidationErrorTooShort xs) = pretty @Text "PVP numbers must be at least A.B:" <+> pretty xs
+  pretty (ValidationErrorNegative i) = pretty @Text "PVP numbers cannot be negative:" <+> pretty i
 
 -- | Errors that can occur when reading PVP version numbers.
 --
 -- @since 0.1.0.0
 data ReadStringError
-  = -- | Error when reading a string.
+  = -- | Error when parsing a string.
     --
-    -- @since 0.1.0.0
-    RsReadStrErr String
+    -- @since 0.2
+    ReadStringErrorParse String
   | -- | Validation error.
     --
-    -- @since 0.1.0.0
-    RsValidateErr ValidationError
+    -- @since 0.2
+    ReadStringErrorValidate ValidationError
   deriving stock
     ( -- | @since 0.1.0.0
       Eq,
@@ -205,8 +205,8 @@ data ReadStringError
 
 -- | @since 0.1.0.0
 instance Pretty ReadStringError where
-  pretty (RsReadStrErr err) = pretty @Text "Read error:" <+> pretty err
-  pretty (RsValidateErr i) = pretty @Text "Validation error:" <+> pretty i
+  pretty (ReadStringErrorParse err) = pretty @Text "Read error:" <+> pretty err
+  pretty (ReadStringErrorValidate i) = pretty @Text "Validation error:" <+> pretty i
 
 -- | Errors that can occur when reading PVP version numbers from a file.
 --
@@ -214,16 +214,16 @@ instance Pretty ReadStringError where
 data ReadFileError
   = -- | Error for missing file.
     --
-    -- @since 0.1.0.0
-    RfFileNotFoundErr String
+    -- @since 0.2
+    ReadFileErrorFileNotFound String
   | -- | Error for missing version.
     --
-    -- @since 0.1.0.0
-    RfVersionNotFoundErr FilePath
+    -- @since 0.2
+    ReadFileErrorVersionNotFound FilePath
   | -- | Read/Validation error.
     --
-    -- @since 0.1.0.0
-    RfReadValidateErr ReadStringError
+    -- @since 0.2
+    ReadFileErrorReadString ReadStringError
   deriving stock
     ( -- | @since 0.1.0.0
       Eq,
@@ -239,9 +239,9 @@ data ReadFileError
 
 -- | @since 0.1.0.0
 instance Pretty ReadFileError where
-  pretty (RfFileNotFoundErr f) = pretty @Text "File not found:" <+> pretty f
-  pretty (RfVersionNotFoundErr f) = pretty @Text "Version not found:" <+> pretty f
-  pretty (RfReadValidateErr i) = pretty @Text "Read/validation error:" <+> pretty i
+  pretty (ReadFileErrorFileNotFound f) = pretty @Text "File not found:" <+> pretty f
+  pretty (ReadFileErrorVersionNotFound f) = pretty @Text "Version not found:" <+> pretty f
+  pretty (ReadFileErrorReadString i) = pretty @Text "Read error:" <+> pretty i
 
 -- | Smart constructor for 'PackageVersion'. The length of the list must be
 -- > 1 to match PVP's minimal A.B. Furthermore, all digits must be non-negative.
@@ -255,20 +255,20 @@ instance Pretty ReadFileError where
 -- Right (UnsafePackageVersion {unPackageVersion = [2,87,7,1]})
 --
 -- >>> mkPackageVersion [1,2,-3,-4,5]
--- Left (VNegativeErr (-3))
+-- Left (ValidationErrorNegative (-3))
 --
 -- >>> mkPackageVersion [3]
--- Left (VTooShortErr [3])
+-- Left (ValidationErrorTooShort [3])
 --
 -- >>> mkPackageVersion []
--- Left (VTooShortErr [])
+-- Left (ValidationErrorTooShort [])
 --
 -- @since 0.1.0.0
 mkPackageVersion :: [Int] -> Either ValidationError PackageVersion
 mkPackageVersion v@(_ : _ : _) = case filter (< 0) v of
   [] -> Right $ UnsafePackageVersion v
-  (neg : _) -> Left $ VNegativeErr neg
-mkPackageVersion short = Left $ VTooShortErr short
+  (neg : _) -> Left $ ValidationErrorNegative neg
+mkPackageVersion short = Left $ ValidationErrorTooShort short
 
 -- | Displays 'PackageVersion' in 'Text' format.
 --

@@ -12,6 +12,7 @@ module Data.Version.Package.Internal
     ReadFileError (..),
     mkPackageVersion,
     toText,
+    prettyString,
   )
 where
 
@@ -25,7 +26,7 @@ import GHC.Generics (Generic)
 import GHC.Read qualified as RD
 import Language.Haskell.TH.Syntax (Lift (..))
 #if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty, (<+>))
+import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutSmart, (<+>))
 import Prettyprinter.Render.String (renderString)
 #else
 import Data.Text.Prettyprint.Doc (Pretty (..), defaultLayoutOptions, layoutPretty, (<+>))
@@ -177,7 +178,7 @@ instance Pretty ValidationError where
 
 -- | @since 0.1.0.0
 instance Exception ValidationError where
-  displayException = renderString . layoutPretty defaultLayoutOptions . pretty
+  displayException = prettyString
 
 -- | Errors that can occur when reading PVP version numbers.
 --
@@ -207,7 +208,7 @@ instance Pretty ReadStringError where
 
 -- | @since 0.1.0.0
 instance Exception ReadStringError where
-  displayException = renderString . layoutPretty defaultLayoutOptions . pretty
+  displayException = prettyString
 
 -- | Errors that can occur when reading PVP version numbers from a file.
 --
@@ -242,7 +243,7 @@ instance Pretty ReadFileError where
 
 -- | @since 0.1.0.0
 instance Exception ReadFileError where
-  displayException = renderString . layoutPretty defaultLayoutOptions . pretty
+  displayException = prettyString
 
 -- | Smart constructor for 'PackageVersion'. The length of the list must be
 -- > 1 to match PVP's minimal A.B. Furthermore, all digits must be non-negative.
@@ -280,3 +281,12 @@ mkPackageVersion short = Left $ ValidationErrorTooShort short
 -- @since 0.1.0.0
 toText :: PackageVersion -> Text
 toText = T.intercalate "." . fmap (T.pack . show) . unPackageVersion
+
+-- | Renders a string via 'Pretty''s smart option + default layout.
+--
+-- @since 0.2
+prettyString :: Pretty a => a -> String
+prettyString =
+  renderString
+    . layoutSmart defaultLayoutOptions
+    . pretty

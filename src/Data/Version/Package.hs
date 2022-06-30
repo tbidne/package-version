@@ -67,15 +67,6 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..))
-import Prettyprinter qualified as Pretty
-import Prettyprinter.Render.String qualified as PrettyS
-#else
-import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
-import Data.Text.Prettyprint.Doc qualified as Pretty
-import Data.Text.Prettyprint.Doc.Render.String qualified as PrettyS
-#endif
 import Data.Version.Package.Internal
   ( PackageVersion (..),
     ReadFileError (..),
@@ -104,7 +95,7 @@ mkPackageVersionTH :: [Int] -> Q (TExp PackageVersion)
 #endif
 mkPackageVersionTH v = case Internal.mkPackageVersion v of
   Right pv -> liftTyped pv
-  Left err -> error $ prettyErr err
+  Left err -> error $ Internal.prettyString err
 
 -- | Unsafe version of 'Internal.mkPackageVersion', intended to be used with
 -- known constants. Maybe you should use 'mkPackageVersionTH'?
@@ -117,7 +108,7 @@ mkPackageVersionTH v = case Internal.mkPackageVersion v of
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion
-unsafePackageVersion = either (error . prettyErr) id . Internal.mkPackageVersion
+unsafePackageVersion = either (error . Internal.prettyString) id . Internal.mkPackageVersion
 
 -- | Creates a 'PackageVersion' from 'Version'.
 --
@@ -239,7 +230,7 @@ packageVersionTH :: FilePath -> Q (TExp PackageVersion)
 #endif
 packageVersionTH = ioToTH unsafePackageVersionIO
   where
-    unsafePackageVersionIO = fmap (either (error . prettyErr) id) . packageVersionEitherIO
+    unsafePackageVersionIO = fmap (either (error . Internal.prettyString) id) . packageVersionEitherIO
 
 -- | Version of 'packageVersionTH' that returns a 'String' representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
@@ -355,9 +346,3 @@ ioToTH f x = TH.bindCode (TH.runIO (f x)) liftTyped
 ioToTH :: Lift b => (a -> IO b) -> a -> Q (TExp b)
 ioToTH f x = TH.runIO (f x) >>= liftTyped
 #endif
-
-prettyErr :: Pretty a => a -> String
-prettyErr =
-  PrettyS.renderString
-    . Pretty.layoutSmart Pretty.defaultLayoutOptions
-    . pretty

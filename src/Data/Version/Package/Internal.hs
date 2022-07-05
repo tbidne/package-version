@@ -18,7 +18,6 @@ module Data.Version.Package.Internal
 where
 
 import Control.DeepSeq (NFData (..))
-import Control.DeepSeq qualified as DS
 import Control.Exception.Safe (Exception (..))
 import Data.Foldable qualified as F
 import Data.Text (Text)
@@ -88,10 +87,16 @@ newtype PackageVersion = UnsafePackageVersion
     unPackageVersion :: [Int]
   }
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.2
+      Generic,
+      -- | @since 0.1.0.0
       Lift,
       -- | @since 0.1.0.0
       Show
+    )
+  deriving anyclass
+    ( -- | @since 0.1.0.0
+      NFData
     )
 
 -- | @since 0.1.0.0
@@ -134,10 +139,6 @@ instance Read PackageVersion where
       case mkPackageVersion intList of
         Left _ -> TR.pfail
         Right pv -> pure pv
-
--- | @since 0.1.0.0
-instance NFData PackageVersion where
-  rnf (UnsafePackageVersion xs) = DS.deepseq xs ()
 
 -- | @since 0.1.0.0
 instance Pretty PackageVersion where

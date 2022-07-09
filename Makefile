@@ -13,14 +13,14 @@ build:
 .PHONY: test
 test:
 	if [ -z "$(ARGS)" ]; then \
-		RUN_DOCTEST=true cabal test; \
+		RUN_DOCTEST=1 cabal test; \
 	else \
-		RUN_DOCTEST=true cabal test $(ARGS); \
+		RUN_DOCTEST=1 cabal test $(ARGS); \
 	fi
 
 .PHONY: doctest
 doctest:
-	RUN_DOCTEST=true cabal test doctest
+	RUN_DOCTEST=1 cabal test doctest
 
 .PHONY: unit
 unit:

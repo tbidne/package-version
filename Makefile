@@ -91,3 +91,9 @@ lintc:
 .PHONY: haddockc
 haddockc:
 	nix run github:tbidne/nix-hs-tools/0.6#haddock-cov -- .
+
+# generate dist and docs suitable for hackage
+.PHONY: hackage
+hackage:
+	cabal sdist ;\
+	cabal haddock --haddock-for-hackage --enable-doc

@@ -126,9 +126,7 @@ instance Semigroup PackageVersion where
 instance Monoid PackageVersion where
   mempty = UnsafePackageVersion [0, 0]
 
--- | Derived by GHC 8.10.7 with validation via 'mkPackageVersion'.
---
--- @since 0.1.0.0
+-- | @since 0.1.0.0
 instance Read PackageVersion where
   readPrec = TR.parens $
     TR.prec 11 $ do

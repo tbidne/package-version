@@ -9,5 +9,3 @@ ghc-options:
     -Wredundant-constraints -Wunused-packages -Wmissing-deriving-strategies
 extra-deps:
 - env-guard-0.2@sha256:59410eed9b9ddbd115760a59c7170927320d8612e414701d323a0c8985c97523,1251
-nix:
-  shell-file: nix/stack_nightly.nix

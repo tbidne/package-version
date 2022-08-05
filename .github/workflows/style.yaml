@@ -1,4 +1,4 @@
-name: "stack_lts-18"
+name: style
 
 on:
   push:
@@ -8,11 +8,11 @@ on:
   pull_request:
     branches:
       - main
-
+  
   workflow_dispatch:
 
 jobs:
-  stack_lts-18:
+  check-style:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.0.2
@@ -24,12 +24,17 @@ jobs:
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compile
-        run: |
-          nix-shell nix/stack_lts-18.nix --command \
-            "stack update && stack build --nix --ghc-options -Werror"
+      - name: cabal-fmt
+        run: make cabalfmtc
 
-      - name: Test
-        run: |
-          nix-shell nix/stack_lts-18.nix --command \
-            "stack update && MAX_RUNS=10000 stack test --nix --ghc-options -Werror"
+      - name: hlint
+        run: make lintc
+
+      - name: ormolu
+        run: make hsformatc
+
+      - name: nixpkgs-fmt
+        run: make nixpkgsfmtc
+      
+      - name: haddock
+        run: nix develop .#devShells.x86_64-linux.ci -c bash -c "make haddockc"

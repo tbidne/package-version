@@ -29,7 +29,7 @@ tests =
 throwIOSuccess :: TestTree
 throwIOSuccess = THU.testCase "packageVersionThrowIO retrieves version" $ do
   version <- PV.packageVersionThrowIO "package-version.cabal"
-  UnsafePackageVersion [0, 2] @=? version
+  UnsafePackageVersion [0, 3] @=? version
 
 throwIOFailure :: TestTree
 throwIOFailure = THU.testCase "packageVersionThrowIO throws exception" $ do
@@ -46,7 +46,7 @@ throwIOFailure = THU.testCase "packageVersionThrowIO throws exception" $ do
 stringIOSuccess :: TestTree
 stringIOSuccess = THU.testCase "packageVersionStringIO retrieves version" $ do
   version <- PV.packageVersionStringIO "package-version.cabal"
-  "0.2" @=? version
+  "0.3" @=? version
 
 stringIOFailure :: TestTree
 stringIOFailure = THU.testCase "packageVersionStringIO retrieves UNKNOWN" $ do
@@ -56,7 +56,7 @@ stringIOFailure = THU.testCase "packageVersionStringIO retrieves UNKNOWN" $ do
 textIOSuccess :: TestTree
 textIOSuccess = THU.testCase "packageVersionTextIO retrieves version" $ do
   version <- PV.packageVersionTextIO "package-version.cabal"
-  "0.2" @=? version
+  "0.3" @=? version
 
 textIOFailure :: TestTree
 textIOFailure = THU.testCase "packageVersionTextIO retrieves UNKNOWN" $ do
@@ -66,7 +66,7 @@ textIOFailure = THU.testCase "packageVersionTextIO retrieves UNKNOWN" $ do
 eitherIOSuccess :: TestTree
 eitherIOSuccess = THU.testCase "packageVersionEitherIO retrieves version" $ do
   version <- PV.packageVersionEitherIO "package-version.cabal"
-  Right (UnsafePackageVersion [0, 2]) @=? version
+  Right (UnsafePackageVersion [0, 3]) @=? version
 
 eitherIOFailure :: TestTree
 eitherIOFailure = THU.testCase "packageVersionEitherIO retrieves error" $ do

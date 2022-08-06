@@ -73,6 +73,7 @@ import Data.Version.Package.Internal
     ReadFileError (..),
     ReadStringError (..),
     ValidationError (..),
+    unPackageVersion,
   )
 import Data.Version.Package.Internal qualified as Internal
 import Language.Haskell.TH qualified as TH
@@ -86,7 +87,7 @@ import Text.Read qualified as TR
 --
 -- ==== __Examples__
 -- >>> $$(mkPackageVersionTH [2,4,0])
--- UnsafePackageVersion {unPackageVersion = [2,4,0]}
+-- UnsafePackageVersion [2,4,0]
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -105,7 +106,7 @@ mkPackageVersionTH v = case Internal.mkPackageVersion v of
 --
 -- ==== __Examples__
 -- >>> unsafePackageVersion [1,2,3]
--- UnsafePackageVersion {unPackageVersion = [1,2,3]}
+-- UnsafePackageVersion [1,2,3]
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion
@@ -119,10 +120,10 @@ unsafePackageVersion = either (error . Internal.prettyString) id . Internal.mkPa
 --
 -- ==== __Examples__
 -- >>> fromVersion (Version [2,13,0] ["alpha"])
--- Right (UnsafePackageVersion {unPackageVersion = [2,13,0]})
+-- Right (UnsafePackageVersion [2,13,0])
 --
 -- >>> fromVersion (Version [] [])
--- Left (ValidationErrorTooShort [])
+-- Left ValidationErrorEmpty
 --
 -- @since 0.1.0.0
 fromVersion :: Version -> Either ValidationError PackageVersion
@@ -133,7 +134,7 @@ fromVersion = Internal.mkPackageVersion . versionBranch
 --
 -- ==== __Examples__
 -- >>> fromString "1.4.27.3"
--- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
+-- Right (UnsafePackageVersion [1,4,27,3])
 --
 -- >>> fromString ""
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
@@ -147,9 +148,6 @@ fromVersion = Internal.mkPackageVersion . versionBranch
 -- >>> fromString "1.2."
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
--- >>> fromString "1"
--- Left (ReadStringErrorValidate (ValidationErrorTooShort [1]))
---
 -- >>> fromString "-3.1.2"
 -- Left (ReadStringErrorValidate (ValidationErrorNegative (-3)))
 --
@@ -162,7 +160,7 @@ fromString = fromText . T.pack
 --
 -- ==== __Examples__
 -- >>> fromText "1.4.27.3"
--- Right (UnsafePackageVersion {unPackageVersion = [1,4,27,3]})
+-- Right (UnsafePackageVersion [1,4,27,3])
 --
 -- >>> fromText ""
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
@@ -176,8 +174,8 @@ fromString = fromText . T.pack
 -- >>> fromText "1.2."
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
--- >>> fromText "1"
--- Left (ReadStringErrorValidate (ValidationErrorTooShort [1]))
+-- >>> fromText ""
+-- Left (ReadStringErrorParse "Prelude.read: no parse")
 --
 -- >>> fromText "-3.1.2"
 -- Left (ReadStringErrorValidate (ValidationErrorNegative (-3)))
@@ -221,7 +219,7 @@ toString = L.intercalate "." . fmap show . unPackageVersion
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTH "package-version.cabal")
--- UnsafePackageVersion {unPackageVersion = [0,2]}
+-- UnsafePackageVersion [0,3]
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -239,7 +237,7 @@ packageVersionTH = ioToTH unsafePackageVersionIO
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionStringTH "package-version.cabal")
--- "0.2"
+-- "0.3"
 --
 -- >>> $$(packageVersionStringTH "not-found.cabal")
 -- "UNKNOWN"
@@ -258,7 +256,7 @@ packageVersionStringTH = ioToTH packageVersionStringIO
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTextTH "package-version.cabal")
--- "0.2"
+-- "0.3"
 --
 -- >>> $$(packageVersionTextTH "not-found.cabal")
 -- "UNKNOWN"
@@ -276,7 +274,7 @@ packageVersionTextTH = ioToTH packageVersionTextIO
 --
 -- ==== __Examples__
 -- >>> packageVersionThrowIO "package-version.cabal"
--- UnsafePackageVersion {unPackageVersion = [0,2]}
+-- UnsafePackageVersion [0,3]
 --
 -- @since 0.1.0.0
 packageVersionThrowIO :: FilePath -> IO PackageVersion
@@ -288,7 +286,7 @@ packageVersionThrowIO = packageVersionEitherIO >=> either SafeEx.throw pure
 --
 -- ==== __Examples__
 -- >>> packageVersionStringIO "package-version.cabal"
--- "0.2"
+-- "0.3"
 --
 -- >>> packageVersionStringIO "not-found.cabal"
 -- "UNKNOWN"
@@ -307,7 +305,7 @@ packageVersionStringIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionTextIO "package-version.cabal"
--- "0.2"
+-- "0.3"
 --
 -- >>> packageVersionTextIO "not-found.cabal"
 -- "UNKNOWN"
@@ -324,7 +322,7 @@ packageVersionTextIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionEitherIO "package-version.cabal"
--- Right (UnsafePackageVersion {unPackageVersion = [0,2]})
+-- Right (UnsafePackageVersion [0,3])
 --
 -- @since 0.1.0.0
 packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)

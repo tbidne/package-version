@@ -33,12 +33,12 @@ listIntTHSuccess = THU.testCase "mkPackageVersionTH creates PackageVersion" $ do
 thSuccess :: TestTree
 thSuccess = THU.testCase "packageVersionTH retrieves version" $ do
   let version = $$(PV.packageVersionTH "package-version.cabal")
-  UnsafePackageVersion [0, 2] @=? version
+  UnsafePackageVersion [0, 3] @=? version
 
 stringTHSuccess :: TestTree
 stringTHSuccess = THU.testCase "packageVersionStringTH retrieves version" $ do
   let version = $$(PV.packageVersionStringTH "package-version.cabal")
-  "0.2" @=? version
+  "0.3" @=? version
 
 stringTHFailure :: TestTree
 stringTHFailure = THU.testCase "packageVersionStringTH retrieves UNKNOWN" $ do
@@ -48,7 +48,7 @@ stringTHFailure = THU.testCase "packageVersionStringTH retrieves UNKNOWN" $ do
 textTHSuccess :: TestTree
 textTHSuccess = THU.testCase "packageVersionTextTH retrieves version" $ do
   let version = $$(PV.packageVersionTextTH "package-version.cabal")
-  "0.2" @=? version
+  "0.3" @=? version
 
 textTHFailure :: TestTree
 textTHFailure = THU.testCase "packageVersionTextTH retrieves UNKNOWN" $ do

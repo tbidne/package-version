@@ -12,6 +12,7 @@ module Data.Version.Package.Internal
     ReadStringError (..),
     ReadFileError (..),
     mkPackageVersion,
+    unPackageVersion,
     toText,
     prettyString,
   )
@@ -70,22 +71,22 @@ import Text.Read qualified as TR
 -- True
 --
 -- >>> UnsafePackageVersion [5,6,0] <> UnsafePackageVersion [9,0,0]
--- UnsafePackageVersion {unPackageVersion = [9,0,0]}
+-- UnsafePackageVersion [9,0,0]
 --
 -- >>> UnsafePackageVersion [0,9] <> UnsafePackageVersion [0,9,0,0]
--- UnsafePackageVersion {unPackageVersion = [0,9]}
+-- UnsafePackageVersion [0,9]
 --
--- >>> TR.readEither @PackageVersion "UnsafePackageVersion {unPackageVersion = [3,2,1]}"
--- Right (UnsafePackageVersion {unPackageVersion = [3,2,1]})
+-- >>> TR.readEither @PackageVersion "UnsafePackageVersion [3,2,1]"
+-- Right (UnsafePackageVersion [3,2,1])
 --
--- >>> TR.readEither @PackageVersion "UnsafePackageVersion {unPackageVersion = [3]}"
+-- >>> TR.readEither @PackageVersion "UnsafePackageVersion [-2]"
+-- Left "Prelude.read: no parse"
+--
+-- >>> TR.readEither @PackageVersion "UnsafePackageVersion []"
 -- Left "Prelude.read: no parse"
 --
 -- @since 0.1.0.0
-newtype PackageVersion = UnsafePackageVersion
-  { -- | @since 0.1.0.0
-    unPackageVersion :: [Int]
-  }
+newtype PackageVersion = UnsafePackageVersion [Int]
   deriving stock
     ( -- | @since 0.2
       Generic,
@@ -104,6 +105,11 @@ pattern MkPackageVersion :: [Int] -> PackageVersion
 pattern MkPackageVersion v <- UnsafePackageVersion v
 
 {-# COMPLETE MkPackageVersion #-}
+
+-- | @since 0.3
+unPackageVersion :: PackageVersion -> [Int]
+unPackageVersion (UnsafePackageVersion x) = x
+{-# INLINE unPackageVersion #-}
 
 -- | @since 0.1.0.0
 instance Eq PackageVersion where
@@ -124,19 +130,19 @@ instance Semigroup PackageVersion where
 
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where
-  mempty = UnsafePackageVersion [0, 0]
+  mempty = UnsafePackageVersion [0]
 
 -- | @since 0.1.0.0
 instance Read PackageVersion where
   readPrec = TR.parens $
-    TR.prec 11 $ do
+    TR.prec 10 $ do
       RD.expectP $ TR.Ident "UnsafePackageVersion"
-      RD.expectP $ TR.Punc "{"
-      intList <- RD.readField "unPackageVersion" (TR.reset RD.readPrec)
-      RD.expectP $ TR.Punc "}"
+      intList <- TR.step RD.readPrec
       case mkPackageVersion intList of
-        Left _ -> TR.pfail
+        Left err -> fail $ prettyString err
         Right pv -> pure pv
+
+  readListPrec = TR.readListPrecDefault
 
 -- | @since 0.1.0.0
 instance Pretty PackageVersion where
@@ -154,10 +160,10 @@ dropTrailingZeroes xs = take (lastNonZero xs) xs
 --
 -- @since 0.1.0.0
 data ValidationError
-  = -- | PVP version numbers must be at least A.B
+  = -- | PVP version number cannot be empty.
     --
-    -- @since 0.2
-    ValidationErrorTooShort [Int]
+    -- @since 0.3
+    ValidationErrorEmpty
   | -- | PVP version numbers cannot be negative.
     --
     -- @since 0.2
@@ -177,7 +183,7 @@ data ValidationError
 
 -- | @since 0.1.0.0
 instance Pretty ValidationError where
-  pretty (ValidationErrorTooShort xs) = pretty @Text "PVP numbers must be at least A.B:" <+> pretty xs
+  pretty ValidationErrorEmpty = pretty @Text "PVP number cannot be empty"
   pretty (ValidationErrorNegative i) = pretty @Text "PVP numbers cannot be negative:" <+> pretty i
 
 -- | @since 0.1.0.0
@@ -263,26 +269,26 @@ instance Exception ReadFileError where
 -- ==== __Examples__
 --
 -- >>> mkPackageVersion [1,2]
--- Right (UnsafePackageVersion {unPackageVersion = [1,2]})
+-- Right (UnsafePackageVersion [1,2])
 --
 -- >>> mkPackageVersion [2,87,7,1]
--- Right (UnsafePackageVersion {unPackageVersion = [2,87,7,1]})
+-- Right (UnsafePackageVersion [2,87,7,1])
 --
 -- >>> mkPackageVersion [1,2,-3,-4,5]
 -- Left (ValidationErrorNegative (-3))
 --
 -- >>> mkPackageVersion [3]
--- Left (ValidationErrorTooShort [3])
+-- Right (UnsafePackageVersion [3])
 --
 -- >>> mkPackageVersion []
--- Left (ValidationErrorTooShort [])
+-- Left ValidationErrorEmpty
 --
 -- @since 0.1.0.0
 mkPackageVersion :: [Int] -> Either ValidationError PackageVersion
-mkPackageVersion v@(_ : _ : _) = case filter (< 0) v of
+mkPackageVersion v@(_ : _) = case filter (< 0) v of
   [] -> Right $ UnsafePackageVersion v
   (neg : _) -> Left $ ValidationErrorNegative neg
-mkPackageVersion short = Left $ ValidationErrorTooShort short
+mkPackageVersion [] = Left ValidationErrorEmpty
 
 -- | Displays 'PackageVersion' in 'Text' format.
 --

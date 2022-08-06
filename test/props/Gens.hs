@@ -40,7 +40,7 @@ import Hedgehog.Range qualified as HR
 genPackageVersion :: MonadGen m => m PackageVersion
 genPackageVersion = UnsafePackageVersion <$> genVers
   where
-    genVers = HG.list (HR.exponential 3 10_000) genSingleVersNum
+    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNum
 
 -- | Generates a valid 'PackageVersion' 'String'.
 --
@@ -48,7 +48,7 @@ genPackageVersion = UnsafePackageVersion <$> genVers
 genValidString :: MonadGen m => m String
 genValidString = L.intercalate "." <$> genVers
   where
-    genVers = HG.list (HR.exponential 3 10_000) genSingleVersNumStr
+    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNumStr
 
 -- | Generates a valid 'PackageVersion' 'Text'.
 --
@@ -62,7 +62,7 @@ genValidText = T.pack <$> genValidString
 genShortString :: MonadGen m => m String
 genShortString = L.intercalate "." <$> genVers
   where
-    genVers = HG.list (HR.constant 0 1) genSingleVersNumStr
+    genVers = HG.list (HR.constant 0 0) genSingleVersNumStr
 
 -- | Generates an invalid 'PackageVersion' 'Text' that is too short.
 --
@@ -80,7 +80,7 @@ genNegativeStr = do
   shuffled <- HG.shuffle (invalid : valid)
   pure $ L.intercalate "." shuffled
   where
-    genVers = HG.list (HR.exponential 3 10_000) genSingleVersNumStr
+    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNumStr
 
 -- | Generates an invalid 'PackageVersion' 'Text' that includes negatives.
 --
@@ -100,7 +100,7 @@ genSingleVersNumStr = show <$> genSingleVersNum
 genValidVersion :: MonadGen m => m Version
 genValidVersion = Version <$> genVers <*> genTags
   where
-    genVers = HG.list (HR.exponential 3 10_000) genSingleVersNum
+    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNum
 
 -- | Generates an invalid 'PackageVersion' 'Version' that is too short.
 --
@@ -108,7 +108,7 @@ genValidVersion = Version <$> genVers <*> genTags
 genShortVersion :: MonadGen m => m Version
 genShortVersion = Version <$> genVers <*> genTags
   where
-    genVers = HG.list (HR.constant 0 1) genSingleVersNum
+    genVers = HG.list (HR.constant 0 0) genSingleVersNum
 
 -- | Generates an invalid 'PackageVersion' 'Version' that includes negatives.
 --
@@ -121,7 +121,7 @@ genNegativeVersion = do
   shuffled <- HG.shuffle (invalid : valid)
   pure $ Version shuffled tags
   where
-    genVers = HG.list (HR.constant 3 100) genSingleVersNum
+    genVers = HG.list (HR.constant 1 100) genSingleVersNum
 
 -- | Generates a valid 'PackageVersion' List 'Int'.
 --
@@ -129,7 +129,7 @@ genNegativeVersion = do
 genValidListInt :: MonadGen m => m [Int]
 genValidListInt = genVers
   where
-    genVers = HG.list (HR.exponential 3 10_000) genSingleVersNum
+    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNum
 
 -- | Generates an invalid 'PackageVersion' List 'Int' that is too short.
 --
@@ -137,7 +137,7 @@ genValidListInt = genVers
 genShortListInt :: MonadGen m => m [Int]
 genShortListInt = genVers
   where
-    genVers = HG.list (HR.constant 0 1) genSingleVersNum
+    genVers = HG.list (HR.constant 0 0) genSingleVersNum
 
 -- | Generates an invalid 'PackageVersion' List 'Int' that includes a negative.
 --
@@ -148,7 +148,7 @@ genNegativeListInt = do
   invalid <- HG.int (HR.constant (-9_999) (-1))
   HG.shuffle (invalid : valid)
   where
-    genVers = HG.list (HR.constant 3 100) genSingleVersNum
+    genVers = HG.list (HR.constant 1 100) genSingleVersNum
 
 genTags :: MonadGen m => m [String]
 genTags = HG.list (HR.exponential 0 100) genTag

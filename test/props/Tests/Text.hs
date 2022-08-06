@@ -62,7 +62,7 @@ shortStringFails = T.askOption $ \(MkMaxRuns limit) ->
         str <- H.forAll Gens.genShortString
         case PV.fromString str of
           Left (ReadStringErrorParse _) -> H.success
-          Left (ReadStringErrorValidate (ValidationErrorTooShort _)) -> H.success
+          Left (ReadStringErrorValidate ValidationErrorEmpty) -> H.success
           bad -> H.annotateShow bad *> H.failure
 
 shortTextFails :: TestTree
@@ -73,7 +73,7 @@ shortTextFails = T.askOption $ \(MkMaxRuns limit) ->
         txt <- H.forAll Gens.genShortText
         case PV.fromText txt of
           Left (ReadStringErrorParse _) -> H.success
-          Left (ReadStringErrorValidate (ValidationErrorTooShort _)) -> H.success
+          Left (ReadStringErrorValidate ValidationErrorEmpty) -> H.success
           bad -> H.annotateShow bad *> H.failure
 
 negativeStringFails :: TestTree

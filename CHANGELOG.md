@@ -7,12 +7,15 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 ### Changed
-* Minimum length is now 1, not 2. This is due cabal allowing package versions
-  with a single digit.
+* Minimum length is now 1, not 2. This is due to cabal allowing package
+  versions with a single digit.
 * Accordingly, `mempty` is now `[0]`, not `[0,0]`.
 * The `ValidationErrorTooShort` data constructor renamed to `ValidationErrorEmpty`.
 * Field `unPackageVersion` removed as it allows unsafe construction via record
   update syntax. This is now an ordinary function.
+
+### Added
+* GHC 9.4 support.
 
 ## [0.2] -- 2022-07-25
 ### Changed

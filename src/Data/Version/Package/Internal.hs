@@ -40,7 +40,7 @@ import Text.Read qualified as TR
 -- @['Int']@) except:
 --
 -- 1. 'PackageVersion' has no 'Data.Version.versionTags'.
--- 2. We enforce PVP's "tags must be at least A.B" invariant via the
+-- 2. We enforce PVP's "tags must be at least A" invariant via the
 --    smart-constructor pattern.
 -- 3. Trailing zeroes are ignored in 'Eq', 'Ord', 'Semigroup', and 'Monoid'.
 --
@@ -48,7 +48,7 @@ import Text.Read qualified as TR
 -- In particular, the 'Monoid' identity is
 --
 -- @
--- [0] = { [0,0], [0,0,0], ... }
+-- [0] = { [0], [0,0], [0,0,0], ... }
 -- @
 --
 -- and its 'Semigroup' instance takes the greatest version (based on 'Ord').

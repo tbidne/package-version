@@ -82,6 +82,8 @@ import Text.Read qualified as TR
 
 -- $setup
 -- >>> :set -XTemplateHaskell
+-- >>> import Data.Version (Version (Version))
+-- >>> import Data.Version.Package.Internal (PackageVersion (UnsafePackageVersion))
 
 -- | Safely constructs a 'PackageVersion' at compile-time.
 --

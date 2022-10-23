@@ -8,6 +8,7 @@ ghc-options:
     -Wmissing-home-modules -Wmissing-export-lists -Wpartial-fields
     -Wredundant-constraints -Wunused-packages -Wmissing-deriving-strategies
 extra-deps:
+- doctest-parallel-0.2.5@sha256:7cbd37fc2e858e33fe68989dc950685c5db83719ad3fc21b452e3b0abb98e4bd,5858
 - env-guard-0.2@sha256:59410eed9b9ddbd115760a59c7170927320d8612e414701d323a0c8985c97523,1251
 nix:
   shell-file: nix/stack.nix

@@ -8,7 +8,6 @@ import Data.Version.Package (ValidationError (..))
 import Data.Version.Package qualified as PV
 import Gens qualified
 import Hedgehog qualified as H
-import MaxRuns (MaxRuns (..))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Utils qualified
@@ -24,29 +23,26 @@ props =
     ]
 
 validVersionSucceeds :: TestTree
-validVersionSucceeds = T.askOption $ \(MkMaxRuns limit) ->
+validVersionSucceeds =
   Utils.testPropertyCompat "Valid Version is decoded" "validVersionSucceeds" $
-    H.withTests limit $
-      H.property $ do
-        vs <- H.forAll Gens.genValidVersion
-        H.assert $ Either.isRight $ PV.fromVersion vs
+    H.property $ do
+      vs <- H.forAll Gens.genValidVersion
+      H.assert $ Either.isRight $ PV.fromVersion vs
 
 shortVersionFails :: TestTree
-shortVersionFails = T.askOption $ \(MkMaxRuns limit) ->
+shortVersionFails =
   Utils.testPropertyCompat "Short Version is not decoded" "shortVersionFails" $
-    H.withTests limit $
-      H.property $ do
-        vs <- H.forAll Gens.genShortVersion
-        case PV.fromVersion vs of
-          Left ValidationErrorEmpty -> H.success
-          bad -> H.annotateShow bad *> H.failure
+    H.property $ do
+      vs <- H.forAll Gens.genShortVersion
+      case PV.fromVersion vs of
+        Left ValidationErrorEmpty -> H.success
+        bad -> H.annotateShow bad *> H.failure
 
 negativeVersionFails :: TestTree
-negativeVersionFails = T.askOption $ \(MkMaxRuns limit) ->
+negativeVersionFails =
   Utils.testPropertyCompat "Negative Version is not decoded" "negativeVersionFails" $
-    H.withTests limit $
-      H.property $ do
-        vs <- H.forAll Gens.genNegativeVersion
-        case PV.fromVersion vs of
-          Left (ValidationErrorNegative _) -> H.success
-          bad -> H.annotateShow bad *> H.failure
+    H.property $ do
+      vs <- H.forAll Gens.genNegativeVersion
+      case PV.fromVersion vs of
+        Left (ValidationErrorNegative _) -> H.success
+        bad -> H.annotateShow bad *> H.failure

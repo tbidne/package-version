@@ -17,7 +17,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ghc: ["8.10.7", "9.0.2", "9.2.4", "9.4.2"]
+        ghc:
+          - 8.10.7
+          - 9.0.2
+          - 9.2.4
+          - 9.4.2
     steps:
       - uses: actions/checkout@v3.0.2
 
@@ -37,6 +41,4 @@ jobs:
         run: cabal test unit
 
       - name: Property Tests
-        env:
-          MAX_RUNS: 1000
-        run: cabal test props
+        run: cabal test props --test-options '--hedgehog-tests 10000'

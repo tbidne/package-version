@@ -81,7 +81,6 @@ test-suite props
   main-is:          Main.hs
   other-modules:
     Gens
-    MaxRuns
     Tests.ListInt
     Tests.Text
     Tests.Version
@@ -91,7 +90,6 @@ test-suite props
     , base
     , hedgehog         >=1.0.2   && <1.3
     , package-version
-    , tagged           ^>=0.8.6
     , tasty
     , tasty-hedgehog   >=1.0.0.2 && <1.4
     , text

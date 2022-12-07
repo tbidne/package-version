@@ -9,7 +9,6 @@ import Data.Version.Package qualified as PV
 import Gens qualified
 import Hedgehog ((===))
 import Hedgehog qualified as H
-import MaxRuns (MaxRuns (..))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Utils qualified
@@ -29,69 +28,62 @@ props =
     ]
 
 toTextRoundTrip :: TestTree
-toTextRoundTrip = T.askOption $ \(MkMaxRuns limit) ->
+toTextRoundTrip =
   Utils.testPropertyCompat "PackageVersion -> Text -> PackageVersion is a round trip" "toTextRoundTrip" $
-    H.withTests limit $
-      H.property $ do
-        pv <- H.forAll Gens.genPackageVersion
-        Right pv === roundTrip pv
+    H.property $ do
+      pv <- H.forAll Gens.genPackageVersion
+      Right pv === roundTrip pv
   where
     roundTrip = PV.fromText . PV.toText
 
 validStrSucceeds :: TestTree
-validStrSucceeds = T.askOption $ \(MkMaxRuns limit) ->
+validStrSucceeds =
   Utils.testPropertyCompat "Valid String is decoded" "validStrSucceeds" $
-    H.withTests limit $
-      H.property $ do
-        str <- H.forAll Gens.genValidString
-        H.assert $ Either.isRight $ PV.fromString str
+    H.property $ do
+      str <- H.forAll Gens.genValidString
+      H.assert $ Either.isRight $ PV.fromString str
 
 validTextSucceeds :: TestTree
-validTextSucceeds = T.askOption $ \(MkMaxRuns limit) ->
+validTextSucceeds =
   Utils.testPropertyCompat "Valid Text is decoded" "validTextSucceeds" $
-    H.withTests limit $
-      H.property $ do
-        txt <- H.forAll Gens.genValidText
-        H.assert $ Either.isRight $ PV.fromText txt
+    H.property $ do
+      txt <- H.forAll Gens.genValidText
+      H.assert $ Either.isRight $ PV.fromText txt
 
 shortStringFails :: TestTree
-shortStringFails = T.askOption $ \(MkMaxRuns limit) ->
+shortStringFails =
   Utils.testPropertyCompat "Short String is not decoded" "shortStringFails" $
-    H.withTests limit $
-      H.property $ do
-        str <- H.forAll Gens.genShortString
-        case PV.fromString str of
-          Left (ReadStringErrorParse _) -> H.success
-          Left (ReadStringErrorValidate ValidationErrorEmpty) -> H.success
-          bad -> H.annotateShow bad *> H.failure
+    H.property $ do
+      str <- H.forAll Gens.genShortString
+      case PV.fromString str of
+        Left (ReadStringErrorParse _) -> H.success
+        Left (ReadStringErrorValidate ValidationErrorEmpty) -> H.success
+        bad -> H.annotateShow bad *> H.failure
 
 shortTextFails :: TestTree
-shortTextFails = T.askOption $ \(MkMaxRuns limit) ->
+shortTextFails =
   Utils.testPropertyCompat "Short Text is not decoded" "shortTextFails" $
-    H.withTests limit $
-      H.property $ do
-        txt <- H.forAll Gens.genShortText
-        case PV.fromText txt of
-          Left (ReadStringErrorParse _) -> H.success
-          Left (ReadStringErrorValidate ValidationErrorEmpty) -> H.success
-          bad -> H.annotateShow bad *> H.failure
+    H.property $ do
+      txt <- H.forAll Gens.genShortText
+      case PV.fromText txt of
+        Left (ReadStringErrorParse _) -> H.success
+        Left (ReadStringErrorValidate ValidationErrorEmpty) -> H.success
+        bad -> H.annotateShow bad *> H.failure
 
 negativeStringFails :: TestTree
-negativeStringFails = T.askOption $ \(MkMaxRuns limit) ->
+negativeStringFails =
   Utils.testPropertyCompat "Negative String is not decoded" "negativeStringFails" $
-    H.withTests limit $
-      H.property $ do
-        str <- H.forAll Gens.genNegativeStr
-        case PV.fromString str of
-          Left (ReadStringErrorValidate (ValidationErrorNegative _)) -> H.success
-          bad -> H.annotateShow bad *> H.failure
+    H.property $ do
+      str <- H.forAll Gens.genNegativeStr
+      case PV.fromString str of
+        Left (ReadStringErrorValidate (ValidationErrorNegative _)) -> H.success
+        bad -> H.annotateShow bad *> H.failure
 
 negativeTextFails :: TestTree
-negativeTextFails = T.askOption $ \(MkMaxRuns limit) ->
+negativeTextFails =
   Utils.testPropertyCompat "Negative Text is not decoded" "negativeTextFails" $
-    H.withTests limit $
-      H.property $ do
-        txt <- H.forAll Gens.genNegativeText
-        case PV.fromText txt of
-          Left (ReadStringErrorValidate (ValidationErrorNegative _)) -> H.success
-          bad -> H.annotateShow bad *> H.failure
+    H.property $ do
+      txt <- H.forAll Gens.genNegativeText
+      case PV.fromText txt of
+        Left (ReadStringErrorValidate (ValidationErrorNegative _)) -> H.success
+        bad -> H.annotateShow bad *> H.failure

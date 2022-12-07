@@ -39,7 +39,6 @@
     in
     {
       packages.default = mkPkg false false;
-
       devShells.default = mkPkg true true;
       devShells.ci = mkPkg true false;
     });

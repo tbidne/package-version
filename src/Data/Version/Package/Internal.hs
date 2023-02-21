@@ -35,9 +35,6 @@ import Data.Text.Prettyprint.Doc.Render.String (renderString)
 #endif
 import Text.Read qualified as TR
 
--- $setup
--- >>> import Text.Read qualified as TR
-
 -- | 'PackageVersion' represents [PVP](https://pvp.haskell.org/) version
 -- numbers. It is similar to "Data.Version"'s 'Data.Version' (i.e. wraps a
 -- @['Int']@) except:

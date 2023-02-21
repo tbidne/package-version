@@ -12,5 +12,30 @@ main =
   guardOrElse'
     "RUN_DOCTEST"
     ExpectEnvSet
-    (DT.mainFromCabal "package-version" [])
+    (DT.doctest args)
     (putStrLn "*** Doctests Disabled ***")
+  where
+    args = files <> exts
+
+files :: [String]
+files =
+  [ "-isrc",
+    "src/Data/Version/Package.hs",
+    "src/Data/Version/Package/Internal.hs"
+  ]
+
+exts :: [String]
+exts =
+  [ "-XBangPatterns",
+    "-XDeriveGeneric",
+    "-XDeriveLift",
+    "-XDerivingStrategies",
+    "-XDerivingVia",
+    "-XImportQualifiedPost",
+    "-XLambdaCase",
+    "-XNumericUnderscores",
+    "-XOverloadedStrings",
+    "-XPatternSynonyms",
+    "-XScopedTypeVariables",
+    "-XTypeApplications"
+  ]

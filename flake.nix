@@ -34,6 +34,7 @@
           ];
           ghc-version = "ghc944";
           compiler = pkgs.haskell.packages."${ghc-version}";
+          hlib = pkgs.haskell.lib;
           mkPkg = returnShellEnv:
             compiler.developPackage {
               inherit returnShellEnv;

@@ -1,6 +1,6 @@
 .PHONY: build clean repl watch ;\
 	cic ci formatc format lint lintc ;\
-	haddockc hackage
+	hackage
 
 # core
 
@@ -18,9 +18,9 @@ watch:
 
 # ci
 
-cic: formatc lintc haddockc
+cic: formatc lintc
 
-ci: lint format haddockc
+ci: lint format
 
 # formatting
 
@@ -41,9 +41,6 @@ lint:
 
 lintc:
 	nix run github:tbidne/nix-hs-tools/0.7#hlint
-
-haddockc:
-	nix run github:tbidne/nix-hs-tools/0.7#haddock-cov -- .
 
 # generate dist and docs suitable for hackage
 hackage:

@@ -4,17 +4,17 @@
 
 # core
 
-ARGS = ""
+T = ""
 
 repl:
-	if [ -z "$(ARGS)" ]; then \
+	if [ -z "$(T)" ]; then \
 		cabal repl; \
 	else \
-		cabal repl $(ARGS); \
+		cabal repl $(T); \
 	fi
 
 watch:
-	ghcid --command "cabal repl $(ARGS)"
+	ghcid --command "cabal repl $(T)"
 
 # ci
 

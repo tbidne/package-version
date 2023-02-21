@@ -21,10 +21,18 @@
             pkgs.zlib
           ];
           devTools = c: with c; [
-            ghcid
-            haskell-language-server
+            (pkgs.haskell.lib.dontCheck ghcid)
+            (hlib.overrideCabal haskell-language-server (old: {
+              configureFlags = (old.configureFlags or [ ]) ++
+                [
+                  "-f -brittany"
+                  "-f -floskell"
+                  "-f -fourmolu"
+                  "-f -stylishhaskell"
+                ];
+            }))
           ];
-          ghc-version = "ghc924";
+          ghc-version = "ghc944";
           compiler = pkgs.haskell.packages."${ghc-version}";
           mkPkg = returnShellEnv:
             compiler.developPackage {
@@ -35,6 +43,9 @@
                 pkgs.haskell.lib.addBuildTools drv
                   (buildTools compiler ++
                     (if returnShellEnv then devTools compiler else [ ]));
+              overrides = final: prev: {
+                tasty-hedgehog = prev.tasty-hedgehog_1_4_0_0;
+              };
             };
         in
         {

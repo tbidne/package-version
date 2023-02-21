@@ -21,7 +21,7 @@
             pkgs.zlib
           ];
           devTools = c: with c; [
-            (pkgs.haskell.lib.dontCheck ghcid)
+            (hlib.dontCheck ghcid)
             (hlib.overrideCabal haskell-language-server (old: {
               configureFlags = (old.configureFlags or [ ]) ++
                 [

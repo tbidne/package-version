@@ -306,7 +306,7 @@ toText = T.intercalate "." . fmap (T.pack . show) . unPackageVersion
 -- | Renders a string via 'Pretty''s smart option + default layout.
 --
 -- @since 0.2
-prettyString :: Pretty a => a -> String
+prettyString :: (Pretty a) => a -> String
 prettyString =
   renderString
     . layoutSmart defaultLayoutOptions

@@ -99,7 +99,7 @@ mkPackageVersionTH :: [Int] -> Q (TExp PackageVersion)
 #endif
 mkPackageVersionTH v = case Internal.mkPackageVersion v of
   Right pv -> liftTyped pv
-  Left err -> error $ Internal.prettyString err
+  Left err -> error $ displayException err
 
 -- | Unsafe version of 'Internal.mkPackageVersion', intended to be used with
 -- known constants. Maybe you should use 'mkPackageVersionTH'?
@@ -112,7 +112,7 @@ mkPackageVersionTH v = case Internal.mkPackageVersion v of
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion
-unsafePackageVersion = either (error . Internal.prettyString) id . Internal.mkPackageVersion
+unsafePackageVersion = either (error . displayException) id . Internal.mkPackageVersion
 
 -- | Creates a 'PackageVersion' from 'Version'.
 --
@@ -221,7 +221,7 @@ toString = L.intercalate "." . fmap show . unPackageVersion
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTH "package-version.cabal")
--- UnsafePackageVersion [0,3]
+-- UnsafePackageVersion [0,4]
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -231,7 +231,7 @@ packageVersionTH :: FilePath -> Q (TExp PackageVersion)
 #endif
 packageVersionTH = ioToTH unsafePackageVersionIO
   where
-    unsafePackageVersionIO = fmap (either (error . Internal.prettyString) id) . packageVersionEitherIO
+    unsafePackageVersionIO = fmap (either (error . displayException) id) . packageVersionEitherIO
 
 -- | Version of 'packageVersionTH' that returns a 'String' representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
@@ -239,7 +239,7 @@ packageVersionTH = ioToTH unsafePackageVersionIO
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionStringTH "package-version.cabal")
--- "0.3"
+-- "0.4"
 --
 -- >>> $$(packageVersionStringTH "not-found.cabal")
 -- "UNKNOWN"
@@ -258,7 +258,7 @@ packageVersionStringTH = ioToTH packageVersionStringIO
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTextTH "package-version.cabal")
--- "0.3"
+-- "0.4"
 --
 -- >>> $$(packageVersionTextTH "not-found.cabal")
 -- "UNKNOWN"
@@ -276,7 +276,7 @@ packageVersionTextTH = ioToTH packageVersionTextIO
 --
 -- ==== __Examples__
 -- >>> packageVersionThrowIO "package-version.cabal"
--- UnsafePackageVersion [0,3]
+-- UnsafePackageVersion [0,4]
 --
 -- @since 0.1.0.0
 packageVersionThrowIO :: FilePath -> IO PackageVersion
@@ -288,7 +288,7 @@ packageVersionThrowIO = packageVersionEitherIO >=> either throwIO pure
 --
 -- ==== __Examples__
 -- >>> packageVersionStringIO "package-version.cabal"
--- "0.3"
+-- "0.4"
 --
 -- >>> packageVersionStringIO "not-found.cabal"
 -- "UNKNOWN"
@@ -307,7 +307,7 @@ packageVersionStringIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionTextIO "package-version.cabal"
--- "0.3"
+-- "0.4"
 --
 -- >>> packageVersionTextIO "not-found.cabal"
 -- "UNKNOWN"
@@ -324,7 +324,7 @@ packageVersionTextIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionEitherIO "package-version.cabal"
--- Right (UnsafePackageVersion [0,3])
+-- Right (UnsafePackageVersion [0,4])
 --
 -- @since 0.1.0.0
 packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)

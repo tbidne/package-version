@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -14,7 +13,6 @@ module Data.Version.Package.Internal
     mkPackageVersion,
     unPackageVersion,
     toText,
-    prettyString,
   )
 where
 
@@ -26,13 +24,6 @@ import Data.Text qualified as T
 import GHC.Generics (Generic)
 import GHC.Read qualified as RD
 import Language.Haskell.TH.Syntax (Lift (..))
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutSmart, (<+>))
-import Prettyprinter.Render.String (renderString)
-#else
-import Data.Text.Prettyprint.Doc (Pretty (..), defaultLayoutOptions, layoutPretty, (<+>))
-import Data.Text.Prettyprint.Doc.Render.String (renderString)
-#endif
 import Text.Read qualified as TR
 
 -- | 'PackageVersion' represents [PVP](https://pvp.haskell.org/) version
@@ -139,14 +130,10 @@ instance Read PackageVersion where
       RD.expectP $ TR.Ident "UnsafePackageVersion"
       intList <- TR.step RD.readPrec
       case mkPackageVersion intList of
-        Left err -> fail $ prettyString err
+        Left err -> fail $ displayException err
         Right pv -> pure pv
 
   readListPrec = TR.readListPrecDefault
-
--- | @since 0.1.0.0
-instance Pretty PackageVersion where
-  pretty = pretty . toText
 
 dropTrailingZeroes :: (Eq a, Num a) => [a] -> [a]
 dropTrailingZeroes xs = take (lastNonZero xs) xs
@@ -182,13 +169,10 @@ data ValidationError
     )
 
 -- | @since 0.1.0.0
-instance Pretty ValidationError where
-  pretty ValidationErrorEmpty = pretty @Text "PVP number cannot be empty"
-  pretty (ValidationErrorNegative i) = pretty @Text "PVP numbers cannot be negative:" <+> pretty i
-
--- | @since 0.1.0.0
 instance Exception ValidationError where
-  displayException = prettyString
+  displayException ValidationErrorEmpty = "PVP number cannot be empty"
+  displayException (ValidationErrorNegative i) =
+    "PVP numbers cannot be negative: " <> show i
 
 -- | Errors that can occur when reading PVP version numbers.
 --
@@ -216,13 +200,10 @@ data ReadStringError
     )
 
 -- | @since 0.1.0.0
-instance Pretty ReadStringError where
-  pretty (ReadStringErrorParse err) = pretty @Text "Read error:" <+> pretty err
-  pretty (ReadStringErrorValidate i) = pretty @Text "Validation error:" <+> pretty i
-
--- | @since 0.1.0.0
 instance Exception ReadStringError where
-  displayException = prettyString
+  displayException (ReadStringErrorParse err) = "Read error: " <> err
+  displayException (ReadStringErrorValidate i) =
+    "Validation error: " <> displayException i
 
 -- | Errors that can occur when reading PVP version numbers from a file.
 --
@@ -254,14 +235,10 @@ data ReadFileError
     )
 
 -- | @since 0.1.0.0
-instance Pretty ReadFileError where
-  pretty (ReadFileErrorGeneral f) = pretty @Text "File not found:" <+> pretty f
-  pretty (ReadFileErrorVersionNotFound f) = pretty @Text "Version not found:" <+> pretty f
-  pretty (ReadFileErrorReadString i) = pretty @Text "Read error:" <+> pretty i
-
--- | @since 0.1.0.0
 instance Exception ReadFileError where
-  displayException = prettyString
+  displayException (ReadFileErrorGeneral f) = "File not found: " <> f
+  displayException (ReadFileErrorVersionNotFound f) = "Version not found: " <> f
+  displayException (ReadFileErrorReadString i) = "Read error: " <> displayException i
 
 -- | Smart constructor for 'PackageVersion'. The length of the list must be
 -- > 1 to match PVP's minimal A.B. Furthermore, all digits must be non-negative.
@@ -299,12 +276,3 @@ mkPackageVersion [] = Left ValidationErrorEmpty
 -- @since 0.1.0.0
 toText :: PackageVersion -> Text
 toText = T.intercalate "." . fmap (T.pack . show) . unPackageVersion
-
--- | Renders a string via 'Pretty''s smart option + default layout.
---
--- @since 0.2
-prettyString :: (Pretty a) => a -> String
-prettyString =
-  renderString
-    . layoutSmart defaultLayoutOptions
-    . pretty

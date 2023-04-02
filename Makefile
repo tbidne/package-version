@@ -1,4 +1,4 @@
-.PHONY: build clean repl watch ;\
+.PHONY: build clean repl watch doctest ;\
 	cic ci formatc format lint lintc ;\
 	hackage
 
@@ -15,6 +15,11 @@ repl:
 
 watch:
 	ghcid --command "cabal repl $(T)"
+
+doctest:
+	cabal build --write-ghc-environment-files=always; \
+	RUN_DOCTEST=1 cabal test doctest; \
+	rm .ghc.environment.*
 
 # ci
 

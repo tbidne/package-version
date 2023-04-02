@@ -52,8 +52,13 @@ module Data.Version.Package
   )
 where
 
-import Control.Exception.Safe (Exception (..))
-import Control.Exception.Safe qualified as SafeEx
+import Control.Exception
+  ( Exception (..),
+    SomeAsyncException (..),
+    SomeException,
+    throwIO,
+    try,
+  )
 import Control.Monad ((>=>))
 import Data.Bifunctor (Bifunctor (..))
 import Data.ByteString qualified as BS
@@ -267,7 +272,7 @@ packageVersionTextTH :: FilePath -> Q (TExp Text)
 packageVersionTextTH = ioToTH packageVersionTextIO
 
 -- | Version of 'packageVersionEitherIO' that throws an
--- 'Control.Exception.Safe.Exception' if any errors are encountered.
+-- 'Exception' if any errors are encountered.
 --
 -- ==== __Examples__
 -- >>> packageVersionThrowIO "package-version.cabal"
@@ -275,7 +280,7 @@ packageVersionTextTH = ioToTH packageVersionTextIO
 --
 -- @since 0.1.0.0
 packageVersionThrowIO :: FilePath -> IO PackageVersion
-packageVersionThrowIO = packageVersionEitherIO >=> either SafeEx.throw pure
+packageVersionThrowIO = packageVersionEitherIO >=> either throwIO pure
 
 -- | Version of 'packageVersionEitherIO' that returns a 'String' representation of
 -- 'PackageVersion' at runtime. Returns @\"UNKNOWN\"@ if any errors are
@@ -324,7 +329,7 @@ packageVersionTextIO fp = do
 -- @since 0.1.0.0
 packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)
 packageVersionEitherIO fp = do
-  eContents <- second T.lines <$> SafeEx.tryAny (readFile' fp)
+  eContents <- second T.lines <$> try' @SomeException (readFile' fp)
   pure $ case eContents of
     Left err -> Left $ ReadFileErrorGeneral $ displayException err
     Right contents -> foldr findVers noVersErr contents
@@ -334,6 +339,23 @@ packageVersionEitherIO fp = do
       Just rest -> first ReadFileErrorReadString $ fromText (T.strip rest)
       Nothing -> acc
     readFile' = fmap (decodeUtf8With lenientDecode) . BS.readFile
+
+-- Vendoring safe-exceptions' "isSyncException" logic, as we only need it for
+-- this single function, so it seems a shame to add a dependency when we
+-- can easily inline it.
+try' :: (Exception e) => IO a -> IO (Either e a)
+try' io =
+  try io >>= \case
+    Left ex
+      | isSyncException ex -> pure $ Left ex
+      | otherwise -> throwIO ex
+    Right x -> pure $ Right x
+
+isSyncException :: (Exception e) => e -> Bool
+isSyncException e =
+  case fromException (toException e) of
+    Just (SomeAsyncException _) -> False
+    Nothing -> True
 
 #if MIN_VERSION_template_haskell(2, 17, 0)
 ioToTH :: Lift b => (a -> IO b) -> a -> Code Q b

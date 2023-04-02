@@ -3,7 +3,7 @@
 -- @since 0.1.0.0
 module Tests.IO (tests) where
 
-import Control.Exception.Safe qualified as SafeEx
+import Control.Exception (try)
 import Data.Version.Package qualified as PV
 import Data.Version.Package.Internal (PackageVersion (..), ReadFileError (..))
 import Test.Tasty (TestTree)
@@ -33,7 +33,7 @@ throwIOSuccess = THU.testCase "packageVersionThrowIO retrieves version" $ do
 
 throwIOFailure :: TestTree
 throwIOFailure = THU.testCase "packageVersionThrowIO throws exception" $ do
-  eVersion <- SafeEx.try $ PV.packageVersionThrowIO "not-found.cabal"
+  eVersion <- try $ PV.packageVersionThrowIO "not-found.cabal"
   case eVersion of
     Left (ReadFileErrorGeneral _) -> pure ()
     Left ex ->

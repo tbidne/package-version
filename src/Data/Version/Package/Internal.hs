@@ -19,7 +19,7 @@ module Data.Version.Package.Internal
 where
 
 import Control.DeepSeq (NFData (..))
-import Control.Exception.Safe (Exception (..))
+import Control.Exception (Exception (..))
 import Data.Foldable qualified as F
 import Data.Text (Text)
 import Data.Text qualified as T

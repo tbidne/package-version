@@ -29,7 +29,8 @@ version:            0.1
 ...
 
 library
-  other-modules: Paths_foo
+  other-modules:   Paths_foo
+  autogen-modules: Paths_foo
 ```
 
 Then we can reference this in our code:
@@ -43,4 +44,4 @@ vsn :: String
 vsn = intercalate "." $ fmap show $ versionBranch Paths.version
 ```
 
-See the [source](https://github.com/haskell/cabal/blob/master/Cabal/src/Distribution/Simple/Build/PathsModule/Z.hs) regarding the API.
+See the [documentation](https://cabal.readthedocs.io/en/3.10/cabal-package.html#accessing-data-files-from-package-code) for more details.

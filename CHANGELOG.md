@@ -9,6 +9,9 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 ### Removed
 * `Pretty` instances as these were not very useful.
 
+### Added
+* Updated bounds on `base`, `bytestring`, and `template-haskell`.
+
 ## [0.3] -- 2022-10-21
 ### Changed
 * Minimum length is now 1, not 2. This is due to cabal allowing package

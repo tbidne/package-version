@@ -4,12 +4,8 @@
 
 
 [![Hackage](https://img.shields.io/hackage/v/package-version)](https://hackage.haskell.org/package/package-version)
-![haskell](https://img.shields.io/static/v1?label=&message=9.4&logo=haskell&logoColor=655889&labelColor=2f353e&color=655889)
+[![ci](http://img.shields.io/github/actions/workflow/status/tbidne/package-version/ci.yaml?branch=main)](https://github.com/tbidne/package-version/actions/workflows/ci.yaml)
 [![BSD-3-Clause](https://img.shields.io/github/license/tbidne/package-version?color=blue)](https://opensource.org/licenses/BSD-3-Clause)
-
-[![nix](http://img.shields.io/github/actions/workflow/status/tbidne/package-version/nix.yaml?branch=main&label=nix&logo=nixos&logoColor=85c5e7&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/nix.yaml)
-[![cabal](http://img.shields.io/github/actions/workflow/status/tbidne/package-version/cabal.yaml?branch=main&label=cabal&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/cabal.yaml)
-[![style](http://img.shields.io/github/actions/workflow/status/tbidne/package-version/style.yaml?branch=main&label=style&logoColor=white&labelColor=2f353c)](https://github.com/tbidne/package-version/actions/workflows/style.yaml)
 
 </div>
 

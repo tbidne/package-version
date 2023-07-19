@@ -1,49 +1,46 @@
 {
   description = "A Haskell package for retrieving the PVP version from cabal files.";
-  inputs.flake-compat = {
-    url = "github:edolstra/flake-compat";
-    flake = false;
-  };
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
+  inputs.nix-hs-utils.url = "github:tbidne/nix-hs-utils";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   outputs =
-    inputs@{ flake-compat
-    , flake-parts
+    inputs@{ flake-parts
+    , nix-hs-utils
     , nixpkgs
     , self
     }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       perSystem = { pkgs, ... }:
         let
-          buildTools = c: [
-            c.cabal-install
-            pkgs.gnumake
-            pkgs.zlib
-          ];
-          devTools = c: [
-            (hlib.dontCheck c.ghcid)
-            (hlib.dontCheck c.haskell-language-server)
-          ];
-          ghc-version = "ghc944";
-          compiler = pkgs.haskell.packages."${ghc-version}";
-          hlib = pkgs.haskell.lib;
+          ghc-version = "ghc945";
+          compiler = pkgs.haskell.packages."${ghc-version}".override {
+            overrides = final: prev: {
+              apply-refact = prev.apply-refact_0_11_0_0;
+            };
+          };
           mkPkg = returnShellEnv:
-            compiler.developPackage {
-              inherit returnShellEnv;
+            nix-hs-utils.mkHaskellPkg {
+              inherit compiler pkgs returnShellEnv;
               name = "package-version";
               root = ./.;
-              modifier = drv:
-                pkgs.haskell.lib.addBuildTools drv
-                  (buildTools compiler ++
-                    (if returnShellEnv then devTools compiler else [ ]));
-              overrides = final: prev: {
-                tasty-hedgehog = prev.tasty-hedgehog_1_4_0_0;
-              };
             };
+          hsDirs = "src test";
         in
         {
           packages.default = mkPkg false;
           devShells.default = mkPkg true;
+
+          apps = {
+            format = nix-hs-utils.format {
+              inherit compiler hsDirs pkgs;
+            };
+            lint = nix-hs-utils.lint {
+              inherit compiler hsDirs pkgs;
+            };
+            lint-refactor = nix-hs-utils.lint-refactor {
+              inherit compiler hsDirs pkgs;
+            };
+          };
         };
       systems = [
         "x86_64-darwin"

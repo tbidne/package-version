@@ -1,0 +1,4 @@
+- ignore:
+    within:
+      - "Tests.TH"
+    name: "Unused LANGUAGE pragma"

@@ -12,10 +12,12 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       perSystem = { pkgs, ... }:
         let
-          ghc-version = "ghc945";
+          ghc-version = "ghc962";
           compiler = pkgs.haskell.packages."${ghc-version}".override {
             overrides = final: prev: {
-              apply-refact = prev.apply-refact_0_11_0_0;
+              hedgehog = prev.hedgehog_1_3;
+              hlint = prev.hlint_3_6_1;
+              ormolu = prev.ormolu_0_7_1_0;
             };
           };
           mkPkg = returnShellEnv:

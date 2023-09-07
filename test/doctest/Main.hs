@@ -3,7 +3,7 @@
 -- @since 0.1.0.0
 module Main (main) where
 
-import System.Environment.Guard (ExpectEnv (..), guardOrElse')
+import System.Environment.Guard (ExpectEnv (ExpectEnvSet), guardOrElse')
 import Test.DocTest qualified as DT
 
 -- | @since 0.1.0.0

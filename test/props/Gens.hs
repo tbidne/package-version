@@ -26,10 +26,11 @@ module Gens
 where
 
 import Data.List qualified as L
+import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
 import Data.Text qualified as T
-import Data.Version (Version (..))
-import Data.Version.Package.Internal (PackageVersion (..))
+import Data.Version (Version (Version))
+import Data.Version.Package.Internal (PackageVersion (UnsafePackageVersion))
 import Hedgehog (MonadGen)
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -38,7 +39,7 @@ import Hedgehog.Range qualified as HR
 --
 -- @since 0.1.0.0
 genPackageVersion :: (MonadGen m) => m PackageVersion
-genPackageVersion = UnsafePackageVersion <$> genVers
+genPackageVersion = UnsafePackageVersion . NE.fromList <$> genVers
   where
     genVers = HG.list (HR.exponential 1 10_000) genSingleVersNum
 

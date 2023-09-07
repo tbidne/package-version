@@ -4,7 +4,12 @@
 module Tests.Version (props) where
 
 import Data.Either qualified as Either
-import Data.Version.Package (ValidationError (..))
+import Data.Version.Package
+  ( ValidationError
+      ( ValidationErrorEmpty,
+        ValidationErrorNegative
+      ),
+  )
 import Data.Version.Package qualified as PV
 import Gens qualified
 import Hedgehog qualified as H

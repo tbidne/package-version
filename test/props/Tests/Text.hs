@@ -4,7 +4,16 @@
 module Tests.Text (props) where
 
 import Data.Either qualified as Either
-import Data.Version.Package (ReadStringError (..), ValidationError (..))
+import Data.Version.Package
+  ( ReadStringError
+      ( ReadStringErrorParse,
+        ReadStringErrorValidate
+      ),
+    ValidationError
+      ( ValidationErrorEmpty,
+        ValidationErrorNegative
+      ),
+  )
 import Data.Version.Package qualified as PV
 import Gens qualified
 import Hedgehog ((===))

@@ -16,15 +16,21 @@ module Data.Version.Package.Internal
   )
 where
 
-import Control.DeepSeq (NFData (..))
-import Control.Exception (Exception (..))
+import Control.DeepSeq (NFData)
+import Control.Exception (Exception (displayException))
 import Data.Foldable qualified as F
+import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
 import Data.Text qualified as T
 import GHC.Generics (Generic)
 import GHC.Read qualified as RD
-import Language.Haskell.TH.Syntax (Lift (..))
+import GHC.Show qualified as Show
+import Language.Haskell.TH.Syntax (Lift)
 import Text.Read qualified as TR
+
+-- $setup
+-- >>> :set -XOverloadedLists
 
 -- | 'PackageVersion' represents [PVP](https://pvp.haskell.org/) version
 -- numbers. It is similar to "Data.Version"'s 'Data.Version' (i.e. wraps a
@@ -62,13 +68,13 @@ import Text.Read qualified as TR
 -- True
 --
 -- >>> UnsafePackageVersion [5,6,0] <> UnsafePackageVersion [9,0,0]
--- UnsafePackageVersion [9,0,0]
+-- UnsafePackageVersion (9 :| [0,0])
 --
 -- >>> UnsafePackageVersion [0,9] <> UnsafePackageVersion [0,9,0,0]
--- UnsafePackageVersion [0,9]
+-- UnsafePackageVersion (0 :| [9])
 --
 -- >>> TR.readEither @PackageVersion "UnsafePackageVersion [3,2,1]"
--- Right (UnsafePackageVersion [3,2,1])
+-- Right (UnsafePackageVersion (3 :| [2,1]))
 --
 -- >>> TR.readEither @PackageVersion "UnsafePackageVersion [-2]"
 -- Left "Prelude.read: no parse"
@@ -77,7 +83,7 @@ import Text.Read qualified as TR
 -- Left "Prelude.read: no parse"
 --
 -- @since 0.1.0.0
-newtype PackageVersion = UnsafePackageVersion [Int]
+newtype PackageVersion = UnsafePackageVersion (NonEmpty Int)
   deriving stock
     ( -- | @since 0.2
       Generic,
@@ -92,15 +98,14 @@ newtype PackageVersion = UnsafePackageVersion [Int]
     )
 
 -- | @since 0.1.0.0
-pattern MkPackageVersion :: [Int] -> PackageVersion
+pattern MkPackageVersion :: NonEmpty Int -> PackageVersion
 pattern MkPackageVersion v <- UnsafePackageVersion v
 
 {-# COMPLETE MkPackageVersion #-}
 
 -- | @since 0.3
-unPackageVersion :: PackageVersion -> [Int]
+unPackageVersion :: PackageVersion -> NonEmpty Int
 unPackageVersion (UnsafePackageVersion x) = x
-{-# INLINE unPackageVersion #-}
 
 -- | @since 0.1.0.0
 instance Eq PackageVersion where
@@ -121,12 +126,12 @@ instance Semigroup PackageVersion where
 
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where
-  mempty = UnsafePackageVersion [0]
+  mempty = UnsafePackageVersion (0 :| [])
 
 -- | @since 0.1.0.0
 instance Read PackageVersion where
   readPrec = TR.parens $
-    TR.prec 10 $ do
+    TR.prec Show.appPrec $ do
       RD.expectP $ TR.Ident "UnsafePackageVersion"
       intList <- TR.step RD.readPrec
       case mkPackageVersion intList of
@@ -135,8 +140,8 @@ instance Read PackageVersion where
 
   readListPrec = TR.readListPrecDefault
 
-dropTrailingZeroes :: (Eq a, Num a) => [a] -> [a]
-dropTrailingZeroes xs = take (lastNonZero xs) xs
+dropTrailingZeroes :: (Eq a, Num a) => NonEmpty a -> [a]
+dropTrailingZeroes xs = NE.take (lastNonZero xs) xs
   where
     lastNonZero = snd . F.foldl' go (0, 0)
     go (!idx, !acc) x
@@ -246,24 +251,24 @@ instance Exception ReadFileError where
 -- ==== __Examples__
 --
 -- >>> mkPackageVersion [1,2]
--- Right (UnsafePackageVersion [1,2])
+-- Right (UnsafePackageVersion (1 :| [2]))
 --
 -- >>> mkPackageVersion [2,87,7,1]
--- Right (UnsafePackageVersion [2,87,7,1])
+-- Right (UnsafePackageVersion (2 :| [87,7,1]))
 --
 -- >>> mkPackageVersion [1,2,-3,-4,5]
 -- Left (ValidationErrorNegative (-3))
 --
 -- >>> mkPackageVersion [3]
--- Right (UnsafePackageVersion [3])
+-- Right (UnsafePackageVersion (3 :| []))
 --
 -- >>> mkPackageVersion []
 -- Left ValidationErrorEmpty
 --
 -- @since 0.1.0.0
 mkPackageVersion :: [Int] -> Either ValidationError PackageVersion
-mkPackageVersion v@(_ : _) = case filter (< 0) v of
-  [] -> Right $ UnsafePackageVersion v
+mkPackageVersion vers@(v : vs) = case filter (< 0) vers of
+  [] -> Right $ UnsafePackageVersion (v :| vs)
   (neg : _) -> Left $ ValidationErrorNegative neg
 mkPackageVersion [] = Left ValidationErrorEmpty
 
@@ -275,4 +280,8 @@ mkPackageVersion [] = Left ValidationErrorEmpty
 --
 -- @since 0.1.0.0
 toText :: PackageVersion -> Text
-toText = T.intercalate "." . fmap (T.pack . show) . unPackageVersion
+toText =
+  T.intercalate "."
+    . fmap (T.pack . show)
+    . NE.toList
+    . unPackageVersion

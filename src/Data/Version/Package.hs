@@ -53,43 +53,51 @@ module Data.Version.Package
 where
 
 import Control.Exception
-  ( Exception (..),
-    SomeAsyncException (..),
+  ( Exception (displayException, fromException, toException),
+    SomeAsyncException (SomeAsyncException),
     SomeException,
     throwIO,
     try,
   )
 import Control.Monad ((>=>))
-import Data.Bifunctor (Bifunctor (..))
+import Data.Bifunctor (Bifunctor (first, second))
 import Data.ByteString qualified as BS
 import Data.List qualified as L
+import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding (decodeUtf8With)
 import Data.Text.Encoding.Error (lenientDecode)
-import Data.Version (Version (..))
+import Data.Version (Version (Version, versionBranch))
+import Data.Version.Package.Internal
+  ( PackageVersion (MkPackageVersion, UnsafePackageVersion),
+    ReadFileError
+      ( ReadFileErrorGeneral,
+        ReadFileErrorReadString,
+        ReadFileErrorVersionNotFound
+      ),
+    ReadStringError (ReadStringErrorParse, ReadStringErrorValidate),
+    ValidationError (ValidationErrorEmpty, ValidationErrorNegative),
+    unPackageVersion,
+  )
+import Data.Version.Package.Internal qualified as Internal
 #if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-import Data.Version.Package.Internal
-  ( PackageVersion (..),
-    ReadFileError (..),
-    ReadStringError (..),
-    ValidationError (..),
-    unPackageVersion,
-  )
-import Data.Version.Package.Internal qualified as Internal
 import Language.Haskell.TH qualified as TH
-import Language.Haskell.TH.Syntax (Lift (..))
+import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Text.Read qualified as TR
+
+-- $setup
+-- >>> :set -XOverloadedLists
 
 -- | Safely constructs a 'PackageVersion' at compile-time.
 --
 -- ==== __Examples__
 -- >>> $$(mkPackageVersionTH [2,4,0])
--- UnsafePackageVersion [2,4,0]
+-- UnsafePackageVersion (2 :| [4,0])
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -108,11 +116,13 @@ mkPackageVersionTH v = case Internal.mkPackageVersion v of
 --
 -- ==== __Examples__
 -- >>> unsafePackageVersion [1,2,3]
--- UnsafePackageVersion [1,2,3]
+-- UnsafePackageVersion (1 :| [2,3])
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: [Int] -> PackageVersion
-unsafePackageVersion = either (error . displayException) id . Internal.mkPackageVersion
+unsafePackageVersion =
+  either (error . displayException) id
+    . Internal.mkPackageVersion
 
 -- | Creates a 'PackageVersion' from 'Version'.
 --
@@ -122,7 +132,7 @@ unsafePackageVersion = either (error . displayException) id . Internal.mkPackage
 --
 -- ==== __Examples__
 -- >>> fromVersion (Version [2,13,0] ["alpha"])
--- Right (UnsafePackageVersion [2,13,0])
+-- Right (UnsafePackageVersion (2 :| [13,0]))
 --
 -- >>> fromVersion (Version [] [])
 -- Left ValidationErrorEmpty
@@ -136,7 +146,7 @@ fromVersion = Internal.mkPackageVersion . versionBranch
 --
 -- ==== __Examples__
 -- >>> fromString "1.4.27.3"
--- Right (UnsafePackageVersion [1,4,27,3])
+-- Right (UnsafePackageVersion (1 :| [4,27,3]))
 --
 -- >>> fromString ""
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
@@ -162,7 +172,7 @@ fromString = fromText . T.pack
 --
 -- ==== __Examples__
 -- >>> fromText "1.4.27.3"
--- Right (UnsafePackageVersion [1,4,27,3])
+-- Right (UnsafePackageVersion (1 :| [4,27,3]))
 --
 -- >>> fromText ""
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
@@ -184,7 +194,9 @@ fromString = fromText . T.pack
 --
 -- @since 0.1.0.0
 fromText :: Text -> Either ReadStringError PackageVersion
-fromText = readInts . splitDots >=> first ReadStringErrorValidate . Internal.mkPackageVersion
+fromText =
+  readInts . splitDots
+    >=> first ReadStringErrorValidate . Internal.mkPackageVersion
   where
     splitDots = T.split (== '.')
     readInts = first ReadStringErrorParse . traverse (TR.readEither . T.unpack)
@@ -197,7 +209,7 @@ fromText = readInts . splitDots >=> first ReadStringErrorValidate . Internal.mkP
 --
 -- @since 0.1.0.0
 toVersion :: PackageVersion -> Version
-toVersion (UnsafePackageVersion v) = Version v []
+toVersion (UnsafePackageVersion v) = Version (NE.toList v) []
 
 -- | Displays 'PackageVersion' in 'String' format.
 --
@@ -207,7 +219,11 @@ toVersion (UnsafePackageVersion v) = Version v []
 --
 -- @since 0.1.0.0
 toString :: PackageVersion -> String
-toString = L.intercalate "." . fmap show . unPackageVersion
+toString =
+  L.intercalate "."
+    . fmap show
+    . NE.toList
+    . unPackageVersion
 
 -- $retrieve-version-th
 -- These functions allow for reading a cabal's version at compile-time. If
@@ -221,7 +237,7 @@ toString = L.intercalate "." . fmap show . unPackageVersion
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTH "package-version.cabal")
--- UnsafePackageVersion [0,4]
+-- UnsafePackageVersion (0 :| [4])
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -231,7 +247,9 @@ packageVersionTH :: FilePath -> Q (TExp PackageVersion)
 #endif
 packageVersionTH = ioToTH unsafePackageVersionIO
   where
-    unsafePackageVersionIO = fmap (either (error . displayException) id) . packageVersionEitherIO
+    unsafePackageVersionIO =
+      fmap (either (error . displayException) id)
+        . packageVersionEitherIO
 
 -- | Version of 'packageVersionTH' that returns a 'String' representation of
 -- 'PackageVersion' at compile-time. Returns @\"UNKNOWN\"@ if any errors are
@@ -276,7 +294,7 @@ packageVersionTextTH = ioToTH packageVersionTextIO
 --
 -- ==== __Examples__
 -- >>> packageVersionThrowIO "package-version.cabal"
--- UnsafePackageVersion [0,4]
+-- UnsafePackageVersion (0 :| [4])
 --
 -- @since 0.1.0.0
 packageVersionThrowIO :: FilePath -> IO PackageVersion
@@ -295,11 +313,7 @@ packageVersionThrowIO = packageVersionEitherIO >=> either throwIO pure
 --
 -- @since 0.1.0.0
 packageVersionStringIO :: FilePath -> IO String
-packageVersionStringIO fp = do
-  eVersion <- packageVersionEitherIO fp
-  pure $ case eVersion of
-    Left _ -> "UNKNOWN"
-    Right v -> toString v
+packageVersionStringIO = fmap T.unpack . packageVersionTextIO
 
 -- | Version of 'packageVersionEitherIO' that returns a 'Text' representation of
 -- 'PackageVersion' at runtime. Returns @\"UNKNOWN\"@ if any errors are
@@ -324,7 +338,7 @@ packageVersionTextIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionEitherIO "package-version.cabal"
--- Right (UnsafePackageVersion [0,4])
+-- Right (UnsafePackageVersion (0 :| [4]))
 --
 -- @since 0.1.0.0
 packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)

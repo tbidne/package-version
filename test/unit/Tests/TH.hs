@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | TH Unit tests.
@@ -6,7 +7,7 @@
 module Tests.TH (tests) where
 
 import Data.Version.Package qualified as PV
-import Data.Version.Package.Internal (PackageVersion (..))
+import Data.Version.Package.Internal (PackageVersion (UnsafePackageVersion))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as Tasty
 import Test.Tasty.HUnit ((@=?))

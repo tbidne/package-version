@@ -81,6 +81,7 @@ import Data.Version.Package.Internal
     unPackageVersion,
   )
 import Data.Version.Package.Internal qualified as Internal
+import GHC.Stack (HasCallStack)
 #if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
 #else
@@ -119,7 +120,7 @@ mkPackageVersionTH v = case Internal.mkPackageVersion v of
 -- UnsafePackageVersion (1 :| [2,3])
 --
 -- @since 0.1.0.0
-unsafePackageVersion :: [Int] -> PackageVersion
+unsafePackageVersion :: (HasCallStack) => [Int] -> PackageVersion
 unsafePackageVersion =
   either (error . displayException) id
     . Internal.mkPackageVersion

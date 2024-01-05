@@ -8,11 +8,14 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 ## [0.4]
 ### Removed
 * `Pretty` instances as these were not very useful.
+
+### Changed
 * Internal representation now uses `NonEmpty` instead of `[]`.
 * `MkPackageVersion` and `unPackageVersion` use `NonEmpty`.
 
 ### Added
 * Updated bounds on `base`, `bytestring`, and `template-haskell`.
+* Added `HasCallStack` to `unsafePackageVersion`.
 
 ## [0.3] -- 2022-10-21
 ### Changed

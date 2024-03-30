@@ -2,7 +2,7 @@ packages: .
 
 package package-version
   ghc-options:
-    -Wall -Wcompat -Werror
+    -Wall -Wcompat
     -Widentities
     -Wincomplete-record-updates
     -Wincomplete-uni-patterns

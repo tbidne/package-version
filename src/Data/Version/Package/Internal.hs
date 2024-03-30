@@ -1,5 +1,3 @@
-{-# LANGUAGE UndecidableInstances #-}
-
 -- | Internal module.
 --
 -- @since 0.1.0.0
@@ -108,7 +106,6 @@ instance Semigroup PackageVersion where
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where
   mempty = MkPackageVersion (0 :| [])
-
 
 dropTrailingZeroes :: (Eq a, Num a) => NonEmpty a -> [a]
 dropTrailingZeroes xs = NE.take (lastNonZero xs) xs

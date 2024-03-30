@@ -8,6 +8,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 ## [0.4]
 ### Removed
 * `Pretty` instances removed as these were not very useful.
+* `Read` instance removed as it was of dubious utility (`fromText` is better).
 
 ### Changed
 * Internal representation now uses `NonEmpty Word` instead of `[Int]`.

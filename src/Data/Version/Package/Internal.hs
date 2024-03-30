@@ -21,10 +21,7 @@ import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
 import Data.Text qualified as T
 import GHC.Generics (Generic)
-import GHC.Read qualified as RD
-import GHC.Show qualified as Show
 import Language.Haskell.TH.Syntax (Lift)
-import Text.Read qualified as TR
 
 -- $setup
 -- >>> :set -XOverloadedLists
@@ -73,15 +70,6 @@ import Text.Read qualified as TR
 -- >>> MkPackageVersion [0,9] <> MkPackageVersion [0,9,0,0]
 -- MkPackageVersion {unPackageVersion = 0 :| [9]}
 --
--- >>> TR.readEither @PackageVersion "MkPackageVersion [3,2,1]"
--- Right (MkPackageVersion {unPackageVersion = 3 :| [2,1]})
---
--- >>> TR.readEither @PackageVersion "MkPackageVersion [-2]"
--- Left "Prelude.read: no parse"
---
--- >>> TR.readEither @PackageVersion "MkPackageVersion []"
--- Left "Prelude.read: no parse"
---
 -- @since 0.1.0.0
 newtype PackageVersion = MkPackageVersion
   { -- | @since 0.4
@@ -121,17 +109,6 @@ instance Semigroup PackageVersion where
 instance Monoid PackageVersion where
   mempty = MkPackageVersion (0 :| [])
 
--- | @since 0.1.0.0
-instance Read PackageVersion where
-  readPrec = TR.parens $
-    TR.prec Show.appPrec $ do
-      RD.expectP $ TR.Ident "MkPackageVersion"
-      intList <- TR.step RD.readPrec
-      case mkPackageVersion intList of
-        Left err -> fail $ displayException err
-        Right pv -> pure pv
-
-  readListPrec = TR.readListPrecDefault
 
 dropTrailingZeroes :: (Eq a, Num a) => NonEmpty a -> [a]
 dropTrailingZeroes xs = NE.take (lastNonZero xs) xs

@@ -64,38 +64,20 @@ test-suite unit
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   other-modules:
-    Tests.IO
-    Tests.TH
-
-  build-depends:
-    , base
-    , package-version
-    , tasty            >=1.1.0.3 && <1.6
-    , tasty-hunit      >=0.9     && <0.11
-
-  hs-source-dirs:   test/unit
-  default-language: Haskell2010
-
-test-suite props
-  import:           common-exts
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  other-modules:
     Gens
-    Tests.ListInt
-    Tests.Text
-    Tests.Version
+    Unit.Data.Version.Package
     Utils
 
   build-depends:
     , base
     , hedgehog         >=1.0.2   && <1.5
     , package-version
-    , tasty
+    , tasty            >=1.1.0.3 && <1.6
     , tasty-hedgehog   >=1.0.0.2 && <1.5
+    , tasty-hunit      >=0.9     && <0.11
     , text
 
-  hs-source-dirs:   test/props
+  hs-source-dirs:   test/unit
   default-language: Haskell2010
 
 test-suite doctest

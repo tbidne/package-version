@@ -26,7 +26,6 @@ module Gens
 where
 
 import Data.List qualified as L
-import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Version (Version (Version))
@@ -39,9 +38,9 @@ import Hedgehog.Range qualified as HR
 --
 -- @since 0.1.0.0
 genPackageVersion :: (MonadGen m) => m PackageVersion
-genPackageVersion = MkPackageVersion . NE.fromList <$> genVers
+genPackageVersion = MkPackageVersion <$> genVers
   where
-    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNumWord
+    genVers = HG.nonEmpty (HR.exponential 1 10_000) genSingleVersNumWord
 
 -- | Generates a valid 'PackageVersion' 'String'.
 --

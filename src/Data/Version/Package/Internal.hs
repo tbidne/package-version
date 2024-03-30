@@ -1,17 +1,14 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- | Internal module. Exposes the invariant-breaking 'UnsafePackageVersion'
--- constructor.
+-- | Internal module.
 --
 -- @since 0.1.0.0
 module Data.Version.Package.Internal
-  ( PackageVersion (MkPackageVersion, ..),
+  ( PackageVersion (..),
     ValidationError (..),
     ReadStringError (..),
     ReadFileError (..),
     mkPackageVersion,
-    unPackageVersion,
     toText,
   )
 where
@@ -37,8 +34,11 @@ import Text.Read qualified as TR
 -- @['Int']@) except:
 --
 -- 1. 'PackageVersion' has no 'Data.Version.versionTags'.
--- 2. We enforce PVP's "tags must be at least A" invariant via the
---    smart-constructor pattern.
+-- 2. We enforce PVP invariants i.e.
+--
+--      * Tags must have at least one component.
+--      * All components >= 0.
+--
 -- 3. Trailing zeroes are ignored in 'Eq', 'Ord', 'Semigroup', and 'Monoid'.
 --
 -- That is, we declare an equivalence class up to trailing zeroes.
@@ -58,32 +58,35 @@ import Text.Read qualified as TR
 -- @
 --
 -- can be broken. Take care that you do not rely on this law if you are
--- using its underlying @['Int']@ (or 'String') representation.
+-- using its underlying @NonEmpty 'Word'@ (or 'String') representation.
 --
 -- ==== __Examples__
--- >>> UnsafePackageVersion [0,0,0,0] == UnsafePackageVersion [0,0,0]
+-- >>> MkPackageVersion [0,0,0,0] == MkPackageVersion [0,0,0]
 -- True
 --
--- >>> UnsafePackageVersion [4,0,0] > UnsafePackageVersion [1,2,0,0]
+-- >>> MkPackageVersion [4,0,0] > MkPackageVersion [1,2,0,0]
 -- True
 --
--- >>> UnsafePackageVersion [5,6,0] <> UnsafePackageVersion [9,0,0]
--- UnsafePackageVersion (9 :| [0,0])
+-- >>> MkPackageVersion [5,6,0] <> MkPackageVersion [9,0,0]
+-- MkPackageVersion {unPackageVersion = 9 :| [0,0]}
 --
--- >>> UnsafePackageVersion [0,9] <> UnsafePackageVersion [0,9,0,0]
--- UnsafePackageVersion (0 :| [9])
+-- >>> MkPackageVersion [0,9] <> MkPackageVersion [0,9,0,0]
+-- MkPackageVersion {unPackageVersion = 0 :| [9]}
 --
--- >>> TR.readEither @PackageVersion "UnsafePackageVersion [3,2,1]"
--- Right (UnsafePackageVersion (3 :| [2,1]))
+-- >>> TR.readEither @PackageVersion "MkPackageVersion [3,2,1]"
+-- Right (MkPackageVersion {unPackageVersion = 3 :| [2,1]})
 --
--- >>> TR.readEither @PackageVersion "UnsafePackageVersion [-2]"
+-- >>> TR.readEither @PackageVersion "MkPackageVersion [-2]"
 -- Left "Prelude.read: no parse"
 --
--- >>> TR.readEither @PackageVersion "UnsafePackageVersion []"
+-- >>> TR.readEither @PackageVersion "MkPackageVersion []"
 -- Left "Prelude.read: no parse"
 --
 -- @since 0.1.0.0
-newtype PackageVersion = UnsafePackageVersion (NonEmpty Int)
+newtype PackageVersion = MkPackageVersion
+  { -- | @since 0.4
+    unPackageVersion :: NonEmpty Word
+  }
   deriving stock
     ( -- | @since 0.2
       Generic,
@@ -98,23 +101,13 @@ newtype PackageVersion = UnsafePackageVersion (NonEmpty Int)
     )
 
 -- | @since 0.1.0.0
-pattern MkPackageVersion :: NonEmpty Int -> PackageVersion
-pattern MkPackageVersion v <- UnsafePackageVersion v
-
-{-# COMPLETE MkPackageVersion #-}
-
--- | @since 0.3
-unPackageVersion :: PackageVersion -> NonEmpty Int
-unPackageVersion (UnsafePackageVersion x) = x
-
--- | @since 0.1.0.0
 instance Eq PackageVersion where
-  UnsafePackageVersion v1 == UnsafePackageVersion v2 =
+  MkPackageVersion v1 == MkPackageVersion v2 =
     dropTrailingZeroes v1 == dropTrailingZeroes v2
 
 -- | @since 0.1.0.0
 instance Ord PackageVersion where
-  UnsafePackageVersion v1 `compare` UnsafePackageVersion v2 =
+  MkPackageVersion v1 `compare` MkPackageVersion v2 =
     dropTrailingZeroes v1 `compare` dropTrailingZeroes v2
 
 -- | @since 0.1.0.0
@@ -126,13 +119,13 @@ instance Semigroup PackageVersion where
 
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where
-  mempty = UnsafePackageVersion (0 :| [])
+  mempty = MkPackageVersion (0 :| [])
 
 -- | @since 0.1.0.0
 instance Read PackageVersion where
   readPrec = TR.parens $
     TR.prec Show.appPrec $ do
-      RD.expectP $ TR.Ident "UnsafePackageVersion"
+      RD.expectP $ TR.Ident "MkPackageVersion"
       intList <- TR.step RD.readPrec
       case mkPackageVersion intList of
         Left err -> fail $ displayException err
@@ -245,22 +238,23 @@ instance Exception ReadFileError where
   displayException (ReadFileErrorVersionNotFound f) = "Version not found: " <> f
   displayException (ReadFileErrorReadString i) = "Read error: " <> displayException i
 
--- | Smart constructor for 'PackageVersion'. The length of the list must be
--- > 1 to match PVP's minimal A.B. Furthermore, all digits must be non-negative.
+-- | Constructs a 'PackageVersion' from an 'Int' list. The length of the list
+-- must be > 1 to match PVP's minimal A.B. Furthermore, all digits must be
+-- non-negative.
 --
 -- ==== __Examples__
 --
 -- >>> mkPackageVersion [1,2]
--- Right (UnsafePackageVersion (1 :| [2]))
+-- Right (MkPackageVersion {unPackageVersion = 1 :| [2]})
 --
 -- >>> mkPackageVersion [2,87,7,1]
--- Right (UnsafePackageVersion (2 :| [87,7,1]))
+-- Right (MkPackageVersion {unPackageVersion = 2 :| [87,7,1]})
 --
 -- >>> mkPackageVersion [1,2,-3,-4,5]
 -- Left (ValidationErrorNegative (-3))
 --
 -- >>> mkPackageVersion [3]
--- Right (UnsafePackageVersion (3 :| []))
+-- Right (MkPackageVersion {unPackageVersion = 3 :| []})
 --
 -- >>> mkPackageVersion []
 -- Left ValidationErrorEmpty
@@ -268,14 +262,14 @@ instance Exception ReadFileError where
 -- @since 0.1.0.0
 mkPackageVersion :: [Int] -> Either ValidationError PackageVersion
 mkPackageVersion vers@(v : vs) = case filter (< 0) vers of
-  [] -> Right $ UnsafePackageVersion (v :| vs)
+  [] -> Right $ MkPackageVersion (fromIntegral v :| fmap fromIntegral vs)
   (neg : _) -> Left $ ValidationErrorNegative neg
 mkPackageVersion [] = Left ValidationErrorEmpty
 
 -- | Displays 'PackageVersion' in 'Text' format.
 --
 -- ==== __Examples__
--- >>> toText (UnsafePackageVersion [2,7,10,0])
+-- >>> toText (MkPackageVersion [2,7,10,0])
 -- "2.7.10.0"
 --
 -- @since 0.1.0.0

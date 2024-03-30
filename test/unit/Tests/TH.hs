@@ -7,7 +7,7 @@
 module Tests.TH (tests) where
 
 import Data.Version.Package qualified as PV
-import Data.Version.Package.Internal (PackageVersion (UnsafePackageVersion))
+import Data.Version.Package.Internal (PackageVersion (MkPackageVersion))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as Tasty
 import Test.Tasty.HUnit ((@=?))
@@ -29,12 +29,12 @@ tests =
 listIntTHSuccess :: TestTree
 listIntTHSuccess = THU.testCase "mkPackageVersionTH creates PackageVersion" $ do
   let version = $$(PV.mkPackageVersionTH [0, 1, 0, 0])
-  UnsafePackageVersion [0, 1, 0, 0] @=? version
+  MkPackageVersion [0, 1, 0, 0] @=? version
 
 thSuccess :: TestTree
 thSuccess = THU.testCase "packageVersionTH retrieves version" $ do
   let version = $$(PV.packageVersionTH "package-version.cabal")
-  UnsafePackageVersion [0, 4] @=? version
+  MkPackageVersion [0, 4] @=? version
 
 stringTHSuccess :: TestTree
 stringTHSuccess = THU.testCase "packageVersionStringTH retrieves version" $ do

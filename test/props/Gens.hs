@@ -30,7 +30,7 @@ import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Version (Version (Version))
-import Data.Version.Package.Internal (PackageVersion (UnsafePackageVersion))
+import Data.Version.Package.Internal (PackageVersion (MkPackageVersion))
 import Hedgehog (MonadGen)
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -39,9 +39,9 @@ import Hedgehog.Range qualified as HR
 --
 -- @since 0.1.0.0
 genPackageVersion :: (MonadGen m) => m PackageVersion
-genPackageVersion = UnsafePackageVersion . NE.fromList <$> genVers
+genPackageVersion = MkPackageVersion . NE.fromList <$> genVers
   where
-    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNum
+    genVers = HG.list (HR.exponential 1 10_000) genSingleVersNumWord
 
 -- | Generates a valid 'PackageVersion' 'String'.
 --
@@ -88,6 +88,9 @@ genNegativeStr = do
 -- @since 0.1.0.0
 genNegativeText :: (MonadGen m) => m Text
 genNegativeText = T.pack <$> genNegativeStr
+
+genSingleVersNumWord :: (MonadGen m) => m Word
+genSingleVersNumWord = HG.word (HR.exponential 0 9_999)
 
 genSingleVersNum :: (MonadGen m) => m Int
 genSingleVersNum = HG.int (HR.exponential 0 9_999)

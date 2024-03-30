@@ -29,6 +29,7 @@ source-repository head
 common common-exts
   default-extensions:
     BangPatterns
+    DeriveAnyClass
     DeriveGeneric
     DeriveLift
     DerivingStrategies
@@ -36,6 +37,7 @@ common common-exts
     ImportQualifiedPost
     LambdaCase
     NumericUnderscores
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     ScopedTypeVariables

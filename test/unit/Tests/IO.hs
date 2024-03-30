@@ -8,7 +8,7 @@ module Tests.IO (tests) where
 import Control.Exception (try)
 import Data.Version.Package qualified as PV
 import Data.Version.Package.Internal
-  ( PackageVersion (UnsafePackageVersion),
+  ( PackageVersion (MkPackageVersion),
     ReadFileError (ReadFileErrorGeneral),
   )
 import Test.Tasty (TestTree)
@@ -34,7 +34,7 @@ tests =
 throwIOSuccess :: TestTree
 throwIOSuccess = THU.testCase "packageVersionThrowIO retrieves version" $ do
   version <- PV.packageVersionThrowIO "package-version.cabal"
-  UnsafePackageVersion [0, 4] @=? version
+  MkPackageVersion [0, 4] @=? version
 
 throwIOFailure :: TestTree
 throwIOFailure = THU.testCase "packageVersionThrowIO throws exception" $ do
@@ -71,7 +71,7 @@ textIOFailure = THU.testCase "packageVersionTextIO retrieves UNKNOWN" $ do
 eitherIOSuccess :: TestTree
 eitherIOSuccess = THU.testCase "packageVersionEitherIO retrieves version" $ do
   version <- PV.packageVersionEitherIO "package-version.cabal"
-  Right (UnsafePackageVersion [0, 4]) @=? version
+  Right (MkPackageVersion [0, 4]) @=? version
 
 eitherIOFailure :: TestTree
 eitherIOFailure = THU.testCase "packageVersionEitherIO retrieves error" $ do

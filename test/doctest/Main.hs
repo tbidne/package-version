@@ -27,6 +27,7 @@ files =
 exts :: [String]
 exts =
   [ "-XBangPatterns",
+    "-XDeriveAnyClass",
     "-XDeriveGeneric",
     "-XDeriveLift",
     "-XDerivingStrategies",

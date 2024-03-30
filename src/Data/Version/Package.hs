@@ -12,10 +12,12 @@
 -- If only the former is of interest then see 'packageVersionStringTH', as
 -- this is likely the most useful function.
 --
+-- The doctest examples use @-XOverloadedLists@.
+--
 -- @since 0.1.0.0
 module Data.Version.Package
   ( -- * Type
-    PackageVersion (MkPackageVersion),
+    PackageVersion (..),
 
     -- ** Creation
     Internal.mkPackageVersion,
@@ -26,7 +28,6 @@ module Data.Version.Package
     fromText,
 
     -- ** Elimination
-    unPackageVersion,
     toVersion,
     toString,
     Internal.toText,
@@ -70,7 +71,7 @@ import Data.Text.Encoding (decodeUtf8With)
 import Data.Text.Encoding.Error (lenientDecode)
 import Data.Version (Version (Version, versionBranch))
 import Data.Version.Package.Internal
-  ( PackageVersion (MkPackageVersion, UnsafePackageVersion),
+  ( PackageVersion (MkPackageVersion, unPackageVersion),
     ReadFileError
       ( ReadFileErrorGeneral,
         ReadFileErrorReadString,
@@ -78,7 +79,6 @@ import Data.Version.Package.Internal
       ),
     ReadStringError (ReadStringErrorParse, ReadStringErrorValidate),
     ValidationError (ValidationErrorEmpty, ValidationErrorNegative),
-    unPackageVersion,
   )
 import Data.Version.Package.Internal qualified as Internal
 import GHC.Stack (HasCallStack)
@@ -94,11 +94,13 @@ import Text.Read qualified as TR
 -- $setup
 -- >>> :set -XOverloadedLists
 
--- | Safely constructs a 'PackageVersion' at compile-time.
+-- | Safely constructs a 'PackageVersion' at compile-time. If you know that
+-- your input satisfies both invariants (non-empty and non-negative) at
+-- compile-time, consider using the 'MkPackageVersion' constructor directly.
 --
 -- ==== __Examples__
 -- >>> $$(mkPackageVersionTH [2,4,0])
--- UnsafePackageVersion (2 :| [4,0])
+-- MkPackageVersion {unPackageVersion = 2 :| [4,0]}
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -111,13 +113,14 @@ mkPackageVersionTH v = case Internal.mkPackageVersion v of
   Left err -> error $ displayException err
 
 -- | Unsafe version of 'Internal.mkPackageVersion', intended to be used with
--- known constants. Maybe you should use 'mkPackageVersionTH'?
+-- known constants. Maybe you should use 'mkPackageVersionTH' or
+-- 'MkPackageVersion'?
 --
 -- __WARNING: This function is not total. Exercise restraint!__
 --
 -- ==== __Examples__
 -- >>> unsafePackageVersion [1,2,3]
--- UnsafePackageVersion (1 :| [2,3])
+-- MkPackageVersion {unPackageVersion = 1 :| [2,3]}
 --
 -- @since 0.1.0.0
 unsafePackageVersion :: (HasCallStack) => [Int] -> PackageVersion
@@ -133,7 +136,7 @@ unsafePackageVersion =
 --
 -- ==== __Examples__
 -- >>> fromVersion (Version [2,13,0] ["alpha"])
--- Right (UnsafePackageVersion (2 :| [13,0]))
+-- Right (MkPackageVersion {unPackageVersion = 2 :| [13,0]})
 --
 -- >>> fromVersion (Version [] [])
 -- Left ValidationErrorEmpty
@@ -147,7 +150,7 @@ fromVersion = Internal.mkPackageVersion . versionBranch
 --
 -- ==== __Examples__
 -- >>> fromString "1.4.27.3"
--- Right (UnsafePackageVersion (1 :| [4,27,3]))
+-- Right (MkPackageVersion {unPackageVersion = 1 :| [4,27,3]})
 --
 -- >>> fromString ""
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
@@ -173,7 +176,7 @@ fromString = fromText . T.pack
 --
 -- ==== __Examples__
 -- >>> fromText "1.4.27.3"
--- Right (UnsafePackageVersion (1 :| [4,27,3]))
+-- Right (MkPackageVersion {unPackageVersion = 1 :| [4,27,3]})
 --
 -- >>> fromText ""
 -- Left (ReadStringErrorParse "Prelude.read: no parse")
@@ -205,17 +208,17 @@ fromText =
 -- | Creates a 'Version' with empty 'versionTags' from 'PackageVersion'.
 --
 -- ==== __Examples__
--- >>> toVersion (UnsafePackageVersion [3,2,0])
+-- >>> toVersion (MkPackageVersion [3,2,0])
 -- Version {versionBranch = [3,2,0], versionTags = []}
 --
 -- @since 0.1.0.0
 toVersion :: PackageVersion -> Version
-toVersion (UnsafePackageVersion v) = Version (NE.toList v) []
+toVersion (MkPackageVersion v) = Version (NE.toList $ fmap fromIntegral v) []
 
 -- | Displays 'PackageVersion' in 'String' format.
 --
 -- ==== __Examples__
--- >>> toString (UnsafePackageVersion [2,7,10,0])
+-- >>> toString (MkPackageVersion [2,7,10,0])
 -- "2.7.10.0"
 --
 -- @since 0.1.0.0
@@ -238,7 +241,7 @@ toString =
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTH "package-version.cabal")
--- UnsafePackageVersion (0 :| [4])
+-- MkPackageVersion {unPackageVersion = 0 :| [4]}
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -295,7 +298,7 @@ packageVersionTextTH = ioToTH packageVersionTextIO
 --
 -- ==== __Examples__
 -- >>> packageVersionThrowIO "package-version.cabal"
--- UnsafePackageVersion (0 :| [4])
+-- MkPackageVersion {unPackageVersion = 0 :| [4]}
 --
 -- @since 0.1.0.0
 packageVersionThrowIO :: FilePath -> IO PackageVersion
@@ -339,7 +342,7 @@ packageVersionTextIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionEitherIO "package-version.cabal"
--- Right (UnsafePackageVersion (0 :| [4]))
+-- Right (MkPackageVersion {unPackageVersion = 0 :| [4]})
 --
 -- @since 0.1.0.0
 packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)

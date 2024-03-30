@@ -7,11 +7,14 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [0.4]
 ### Removed
-* `Pretty` instances as these were not very useful.
+* `Pretty` instances removed as these were not very useful.
 
 ### Changed
-* Internal representation now uses `NonEmpty` instead of `[]`.
-* `MkPackageVersion` and `unPackageVersion` use `NonEmpty`.
+* Internal representation now uses `NonEmpty Word` instead of `[Int]`.
+* Because the representation now preserves the desired invariants (non-empty
+  and non-negative), the type is now fully exposed from the non-internal
+  module. In particular, the original data constructor `UnsafePackageVersion`
+  is replaced with `MkPackageVersion`.
 
 ### Added
 * Updated bounds on `base`, `bytestring`, and `template-haskell`.

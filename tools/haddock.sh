@@ -9,4 +9,4 @@ mkdir -p docs/
 # shellcheck disable=SC2038
 find docs/ -type f | xargs -I % sh -c "rm -r %"
 
-cp -r dist-newstyle/build/x86_64-linux/ghc-9.4.5/package-version-0.4/opt/doc/html/package-version/* docs/
+cp -r dist-newstyle/build/x86_64-linux/ghc-*/package-version-*/opt/doc/html/package-version/* docs/

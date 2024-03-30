@@ -12,14 +12,8 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       perSystem = { pkgs, ... }:
         let
-          ghc-version = "ghc962";
-          compiler = pkgs.haskell.packages."${ghc-version}".override {
-            overrides = final: prev: {
-              hedgehog = prev.hedgehog_1_3;
-              hlint = prev.hlint_3_6_1;
-              ormolu = prev.ormolu_0_7_1_0;
-            };
-          };
+          ghc-version = "ghc964";
+          compiler = pkgs.haskell.packages."${ghc-version}";
           mkPkg = returnShellEnv:
             nix-hs-utils.mkHaskellPkg {
               inherit compiler pkgs returnShellEnv;

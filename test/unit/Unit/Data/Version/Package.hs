@@ -1,5 +1,10 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TemplateHaskell #-}
+
+#if MIN_VERSION_base(4,16,0)
+{-# LANGUAGE OverloadedRecordDot #-}
+#endif
 
 -- thinks TH is unnecessary, for some reason
 {- HLINT ignore "Unused LANGUAGE pragma" -}
@@ -12,6 +17,7 @@ module Unit.Data.Version.Package (tests) where
 import Control.Exception (Exception (displayException), try)
 import Control.Monad (when)
 import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.Version.Package (PackageVersion (unPackageVersion))
 import Data.Version.Package qualified as PV
 import Data.Version.Package.Internal
   ( PackageVersion (MkPackageVersion),
@@ -158,6 +164,7 @@ textTHFailure = testCase "packageVersionTextTH retrieves UNKNOWN" $ do
   "UNKNOWN" @=? version
 
 miscTests :: TestTree
+#if MIN_VERSION_base(4,16,0)
 miscTests =
   testGroup
     "Misc"
@@ -170,6 +177,9 @@ testOverloadedRecordDot = testCase "Compatible with OverloadedRecordDot" $ do
   where
     versNE = 0 :| [1, 3]
     pv = MkPackageVersion versNE
+#else
+miscTests = testGroup "Misc" []
+#endif
 
 listIntProps :: TestTree
 listIntProps =
@@ -414,8 +424,8 @@ testSemigroupOrd =
       -- one.
       case compare x y of
         EQ -> do
-          x.unPackageVersion === (x <> y).unPackageVersion
-          y.unPackageVersion === (y <> x).unPackageVersion
+          unPackageVersion x === unPackageVersion (x <> y)
+          unPackageVersion y === unPackageVersion (y <> x)
         LT -> do
           y === x <> y
           y === y <> x
@@ -426,8 +436,8 @@ testSemigroupOrd =
 testSemigroupLeftBias :: TestTree
 testSemigroupLeftBias = testCase "(<>) is left-biased for Eq instances" $ do
   -- see NOTE: [Left-bias and unPackageVersion]
-  x.unPackageVersion @=? (x <> y).unPackageVersion
-  y.unPackageVersion @=? (y <> x).unPackageVersion
+  unPackageVersion x @=? unPackageVersion (x <> y)
+  unPackageVersion y @=? unPackageVersion (y <> x)
   where
     x = MkPackageVersion (9 :| [])
     y = MkPackageVersion (9 :| [0])

@@ -37,7 +37,6 @@ common common-exts
     ImportQualifiedPost
     LambdaCase
     NumericUnderscores
-    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     ScopedTypeVariables

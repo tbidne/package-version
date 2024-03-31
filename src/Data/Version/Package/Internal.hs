@@ -98,10 +98,7 @@ instance Ord PackageVersion where
 
 -- | @since 0.1.0.0
 instance Semigroup PackageVersion where
-  pv1 <> pv2 =
-    case pv1 `compare` pv2 of
-      LT -> pv2
-      _ -> pv1
+  (<>) = min
 
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where

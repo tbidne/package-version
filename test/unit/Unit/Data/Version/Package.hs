@@ -3,10 +3,13 @@
 
 -- thinks TH is unnecessary, for some reason
 {- HLINT ignore "Unused LANGUAGE pragma" -}
+{- HLINT ignore "Monoid law, left identity" -}
+{- HLINT ignore "Monoid law, right identity" -}
 
 module Unit.Data.Version.Package (tests) where
 
 import Control.Exception (Exception (displayException), try)
+import Control.Monad (when)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Version.Package qualified as PV
 import Data.Version.Package.Internal
@@ -31,7 +34,8 @@ tests =
       miscTests,
       listIntProps,
       textProps,
-      versionProps
+      versionProps,
+      typeTests
     ]
 
 cabalTests :: TestTree
@@ -315,3 +319,83 @@ negativeVersionFails =
       case PV.fromVersion vs of
         Left (ValidationErrorNegative _) -> H.success
         bad -> H.annotateShow bad *> H.failure
+
+typeTests :: TestTree
+typeTests =
+  testGroup
+    "PackageVersion properties"
+    [ testEq,
+      testOrd,
+      testSemigroupAssoc,
+      testMonoidIdentity
+    ]
+
+testEq :: TestTree
+testEq =
+  Utils.testPropertyCompat "Eq equivalence class" "testEq" $
+    H.property $ do
+      x <- H.forAll Gens.genPackageVersion
+
+      x === appendZero x
+      x === appendZero (appendZero x)
+
+testOrd :: TestTree
+testOrd =
+  Utils.testPropertyCompat "Ord properties" "testOrd" $
+    H.property $ do
+      x <- H.forAll Gens.genPackageVersion
+      y <- H.forAll Gens.genPackageVersion
+      z <- H.forAll Gens.genPackageVersion
+
+      -- comparability
+      H.diff x (\l r -> l <= r || r <= l) y
+
+      -- transitivity
+      when (x <= y && y <= z) (H.diff x (<=) z)
+
+      -- reflexitivity
+      H.diff x (<=) x
+
+      -- anti-symmetry
+      when (x <= y && y <= x) (x === y)
+
+      -- eq class
+      H.diff x (<=) (appendZero x)
+      H.diff x (>=) (appendZero x)
+
+testSemigroupAssoc :: TestTree
+testSemigroupAssoc =
+  Utils.testPropertyCompat "Semigroup associativity" "testSemigroupAssoc" $
+    H.property $ do
+      x <- H.forAll Gens.genPackageVersion
+      y <- H.forAll Gens.genPackageVersion
+      z <- H.forAll Gens.genPackageVersion
+
+      x <> (y <> z) === (x <> y) <> z
+
+testMonoidIdentity :: TestTree
+testMonoidIdentity =
+  Utils.testPropertyCompat "Monoid identity" "testMonoidIdentity" $
+    H.property $ do
+      x <- H.forAll Gens.genPackageVersion
+
+      x === x <> mempty
+      x === mempty <> x
+
+testSemigroupOrd :: TestTree
+testSemigroupOrd =
+  Utils.testPropertyCompat "Semigroup uses Ord" "testSemigroupOrd" $
+    H.property $ do
+      x <- H.forAll Gens.genPackageVersion
+      y <- H.forAll Gens.genPackageVersion
+
+      if x <= y
+        then do
+          x === x <> y
+          x === y <> x
+        else do
+          y === x <> y
+          y === y <> x
+
+appendZero :: PackageVersion -> PackageVersion
+appendZero (MkPackageVersion (x :| xs)) = MkPackageVersion (x :| xs ++ [0])

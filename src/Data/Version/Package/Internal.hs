@@ -1,3 +1,5 @@
+{- HLINT ignore "Use max" -}
+
 -- | Internal module.
 --
 -- @since 0.1.0.0
@@ -98,7 +100,11 @@ instance Ord PackageVersion where
 
 -- | @since 0.1.0.0
 instance Semigroup PackageVersion where
-  (<>) = min
+  x <> y =
+    -- manual over using max so that we are left-biased
+    if x >= y
+      then x
+      else y
 
 -- | @since 0.1.0.0
 instance Monoid PackageVersion where
@@ -209,8 +215,8 @@ instance Exception ReadFileError where
   displayException (ReadFileErrorVersionNotFound f) = "Version not found: " <> f
   displayException (ReadFileErrorReadString i) = "Read error: " <> displayException i
 
--- | Constructs a 'PackageVersion' from an 'Int' list. The length of the list
--- must be > 1 to match PVP's minimal A.B. Furthermore, all digits must be
+-- | Constructs a 'PackageVersion' from an 'Int' list. The list must be
+-- non-empty to match PVP's minimal A. Furthermore, all digits must be
 -- non-negative.
 --
 -- ==== __Examples__

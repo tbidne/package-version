@@ -5,6 +5,7 @@
 {- HLINT ignore "Unused LANGUAGE pragma" -}
 {- HLINT ignore "Monoid law, left identity" -}
 {- HLINT ignore "Monoid law, right identity" -}
+{- HLINT ignore "Use /=" -}
 
 module Unit.Data.Version.Package (tests) where
 
@@ -327,21 +328,38 @@ typeTests =
     [ testEq,
       testOrd,
       testSemigroupAssoc,
-      testMonoidIdentity
+      testMonoidIdentity,
+      testSemigroupOrd,
+      testSemigroupLeftBias
     ]
 
 testEq :: TestTree
 testEq =
-  Utils.testPropertyCompat "Eq equivalence class" "testEq" $
+  Utils.testPropertyCompat "Eq laws / equivalence class" "testEq" $
     H.property $ do
       x <- H.forAll Gens.genPackageVersion
+      y <- H.forAll Gens.genPackageVersion
+      z <- H.forAll Gens.genPackageVersion
 
+      -- reflexitivity
+      x === x
+
+      -- symmetry
+      (x == y) === (y == x)
+
+      -- transitivity
+      when (x == y && y == z) (x === z)
+
+      -- negation
+      (x /= y) === not (x == y)
+
+      -- equiv class
       x === appendZero x
       x === appendZero (appendZero x)
 
 testOrd :: TestTree
 testOrd =
-  Utils.testPropertyCompat "Ord properties" "testOrd" $
+  Utils.testPropertyCompat "Ord laws" "testOrd" $
     H.property $ do
       x <- H.forAll Gens.genPackageVersion
       y <- H.forAll Gens.genPackageVersion
@@ -389,13 +407,30 @@ testSemigroupOrd =
       x <- H.forAll Gens.genPackageVersion
       y <- H.forAll Gens.genPackageVersion
 
-      if x <= y
-        then do
-          x === x <> y
-          x === y <> x
-        else do
+      -- NOTE: [Left-bias and unPackageVersion]
+      --
+      -- We sometimes use unPackageVersion because we want to test
+      -- left-bias i.e. need to use underlying Eq, not equivalence class based
+      -- one.
+      case compare x y of
+        EQ -> do
+          x.unPackageVersion === (x <> y).unPackageVersion
+          y.unPackageVersion === (y <> x).unPackageVersion
+        LT -> do
           y === x <> y
           y === y <> x
+        GT -> do
+          x === x <> y
+          x === y <> x
+
+testSemigroupLeftBias :: TestTree
+testSemigroupLeftBias = testCase "(<>) is left-biased for Eq instances" $ do
+  -- see NOTE: [Left-bias and unPackageVersion]
+  x.unPackageVersion @=? (x <> y).unPackageVersion
+  y.unPackageVersion @=? (y <> x).unPackageVersion
+  where
+    x = MkPackageVersion (9 :| [])
+    y = MkPackageVersion (9 :| [0])
 
 appendZero :: PackageVersion -> PackageVersion
 appendZero (MkPackageVersion (x :| xs)) = MkPackageVersion (x :| xs ++ [0])

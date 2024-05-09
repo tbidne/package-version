@@ -1,16 +1,12 @@
 name: ci
-
 on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
-
   workflow_dispatch:
-
 jobs:
   cabal:
     strategy:
@@ -33,20 +29,15 @@ jobs:
     runs-on: ${{ matrix.platform.os }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: haskell-actions/setup@v2
         with:
           ghc-version: ${{ matrix.ghc }}
-
       - name: Configure
         run: cabal configure --enable-tests --ghc-options -Werror
-
       - name: Compile
         run: cabal build
-
       - name: Doc Tests
-        run : ./tools/doctest.sh
-
+        run: ./tools/doctest.sh
       - name: Unit Tests
         run: cabal test unit --test-options '--hedgehog-tests 10000'
   nix:
@@ -54,35 +45,30 @@ jobs:
       fail-fast: false
       matrix:
         os:
-        - "macos-latest"
-        - "ubuntu-latest"
+          - "macos-latest"
+          - "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup nix
         uses: cachix/install-nix-action@v25
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
           nix_path: nixpkgs=channel:nixos-unstable
-
       - name: Compile & Test
         run: nix build
   lint:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup nix
         uses: cachix/install-nix-action@v25
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
           nix_path: nixpkgs=channel:nixos-unstable
-
       - name: Formatting
         run: |
           nix run .#format
           git diff --exit-code --color=always
-
       - name: HLint
         run: nix run .#lint

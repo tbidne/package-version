@@ -340,7 +340,8 @@ typeTests =
       testSemigroupAssoc,
       testMonoidIdentity,
       testSemigroupOrd,
-      testSemigroupLeftBias
+      testSemigroupLeftBias,
+      testSemigroupSpecs
     ]
 
 testEq :: TestTree
@@ -441,6 +442,11 @@ testSemigroupLeftBias = testCase "(<>) is left-biased for Eq instances" $ do
   where
     x = MkPackageVersion (9 :| [])
     y = MkPackageVersion (9 :| [0])
+
+testSemigroupSpecs :: TestTree
+testSemigroupSpecs = testCase "Explicit Semigroup specs" $ do
+  -- Sanity check for doctest that was inexplicably failing on CI.
+  MkPackageVersion [9, 0, 0] @=? MkPackageVersion [5, 6, 0] <> MkPackageVersion [9, 0, 0]
 
 appendZero :: PackageVersion -> PackageVersion
 appendZero (MkPackageVersion (x :| xs)) = MkPackageVersion (x :| xs ++ [0])

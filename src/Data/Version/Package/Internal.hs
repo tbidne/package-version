@@ -27,8 +27,7 @@ import Language.Haskell.TH.Syntax (Lift)
 -- >>> :set -XOverloadedLists
 
 -- | 'PackageVersion' represents [PVP](https://pvp.haskell.org/) version
--- numbers. It is similar to "Data.Version"'s 'Data.Version' (i.e. wraps a
--- @['Int']@) except:
+-- numbers. It is similar to "Data.Version"'s 'Data.Version' except:
 --
 -- 1. 'PackageVersion' has no 'Data.Version.versionTags'.
 -- 2. We enforce PVP invariants i.e.

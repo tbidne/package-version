@@ -19,5 +19,9 @@ package package-version
     -Wunused-type-patterns
     -Wno-unticked-promoted-constructors
 
+allow-newer: hedgehog:containers
+allow-newer: hedgehog:template-haskell
+allow-newer: tasty-hedgehog:base
+
 optimization: 2
 test-show-details: direct

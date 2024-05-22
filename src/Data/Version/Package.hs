@@ -129,9 +129,10 @@ unsafePackageVersion =
 
 -- | Creates a 'PackageVersion' from 'Version'.
 --
--- Note: Because 'PackageVersion' does not have a 'versionTags', 'fromVersion'
--- is not injective even on "well-formed" 'Version's (i.e. non-negative and length > 1).
--- That is, @'toVersion' . 'fromVersion'@ is /not/ an isomorphism.
+-- Note: Because 'PackageVersion' does not have a 'Data.Version.versionTags',
+-- 'fromVersion' is not injective even on "well-formed" 'Version's
+-- (i.e. non-negative and length > 1). That is, @'toVersion' . 'fromVersion'@
+-- is /not/ an isomorphism.
 --
 -- ==== __Examples__
 -- >>> fromVersion (Version [2,13,0] ["alpha"])
@@ -204,7 +205,8 @@ fromText =
     splitDots = T.split (== '.')
     readInts = first ReadStringErrorParse . traverse (TR.readEither . T.unpack)
 
--- | Creates a 'Version' with empty 'versionTags' from 'PackageVersion'.
+-- | Creates a 'Version' with empty 'Data.Version.versionTags' from
+-- 'PackageVersion'.
 --
 -- ==== __Examples__
 -- >>> toVersion (MkPackageVersion [3,2,0])

@@ -24,9 +24,8 @@ description:
   or runtime via ordinary functions.
 
 category:           Development
-extra-source-files:
-  CHANGELOG.md
-  README.md
+extra-doc-files:    CHANGELOG.md
+extra-source-files: README.md
 
 source-repository head
   type:     git

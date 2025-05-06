@@ -17,8 +17,8 @@ jobs:
           - "9.0.2"
           - "9.2.8"
           - "9.4.8"
-          - "9.6.5"
-          - "9.8.2"
+          - "9.6.6"
+          - "9.8.4"
           - "9.10.1"
           - "9.12.1"
         platform:
@@ -57,14 +57,20 @@ jobs:
       - uses: haskell-actions/setup@v2
         with:
           ghc-version: ${{ matrix.ghc }}
-      # For reasons I do not care to investigate, --enable-tests causes several
-      # GHC 9.4 + windows to die. Thus we leave it to the doctest script.
       - name: Configure
         run: cabal configure --ghc-options -Werror
       - name: Compile
         run: cabal build
-      - name: Doc Tests
-        run: ./tools/doctest.sh
+      - name: Doctests
+        if: ${{ matrix.ghc == '9.8.4'
+             || matrix.ghc == '9.10.1'
+             || matrix.ghc == '9.12.1'
+            }}
+        run: |
+          echo "*** Installing doctest ***"
+          cabal install --ignore-project doctest --flag cabal-doctest
+          echo "*** Running doctest ***"
+          cabal doctest
       - name: Unit Tests
         run: cabal test unit --test-options '--hedgehog-tests 10000'
   nix:

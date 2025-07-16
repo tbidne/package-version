@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the [Haskell Package Versioning Policy](https://pvp.haskell.org/).
 
-## [Unreleased]
+## [0.4.1] -- 2025-07-17
 ### Changed
 * Doctests use cabal external command, hence no longer part of test suite.
   Therefore `--enable-tests` will no longer incur a GHC dependency.
@@ -53,6 +53,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 * First version. Released on an unsuspecting world.
 
+[0.4.1]: https://github.com/tbidne/package-version/compare/0.4..0.4.1
 [0.4]: https://github.com/tbidne/package-version/compare/0.3..0.4
 [0.3]: https://github.com/tbidne/package-version/compare/0.2..0.3
 [0.2]: https://github.com/tbidne/package-version/compare/0.1.0.0..0.2

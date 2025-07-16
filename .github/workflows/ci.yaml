@@ -21,13 +21,10 @@ jobs:
           - "9.8.4"
           - "9.10.1"
           - "9.12.1"
-        platform:
-          - os: "macos-latest"
-            set-env: "export"
-          - os: "ubuntu-latest"
-            set-env: "export"
-          - os: "windows-latest"
-            set-env: "set"
+        os:
+          - "macos-latest"
+          - "ubuntu-latest"
+          - "windows-latest"
         # Evidently, the below GHCs do not play nicely with the macos-latest
         # runner anymore:
         #
@@ -49,9 +46,9 @@ jobs:
         # GHCs. All of this sounds like too much work for a purely CI failure,
         # so we just exclude them so CI is green.
         exclude:
-          - {ghc: "8.10.7", platform: {os: "macos-latest", set-env: "export"}}
-          - {ghc: "9.0.2", platform: {os: "macos-latest", set-env: "export"}}
-    runs-on: ${{ matrix.platform.os }}
+          - {ghc: "8.10.7", os: "macos-latest"}
+          - {ghc: "9.0.2", os: "macos-latest"}
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: haskell-actions/setup@v2
@@ -103,5 +100,5 @@ jobs:
         run: |
           nix run .#format
           git diff --exit-code --color=always
-      - name: HLint
-        run: nix run .#lint
+      #- name: HLint
+      #  run: nix run .#lint

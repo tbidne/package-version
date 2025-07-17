@@ -70,7 +70,7 @@ cabalIOTests =
 throwIOSuccess :: TestTree
 throwIOSuccess = testCase "packageVersionThrowIO retrieves version" $ do
   version <- PV.packageVersionThrowIO "package-version.cabal"
-  MkPackageVersion [0, 4] @=? version
+  MkPackageVersion [0, 4, 1] @=? version
 
 throwIOFailure :: TestTree
 throwIOFailure = testCase "packageVersionThrowIO throws exception" $ do
@@ -87,7 +87,7 @@ throwIOFailure = testCase "packageVersionThrowIO throws exception" $ do
 stringIOSuccess :: TestTree
 stringIOSuccess = testCase "packageVersionStringIO retrieves version" $ do
   version <- PV.packageVersionStringIO "package-version.cabal"
-  "0.4" @=? version
+  "0.4.1" @=? version
 
 stringIOFailure :: TestTree
 stringIOFailure = testCase "packageVersionStringIO retrieves UNKNOWN" $ do
@@ -97,7 +97,7 @@ stringIOFailure = testCase "packageVersionStringIO retrieves UNKNOWN" $ do
 textIOSuccess :: TestTree
 textIOSuccess = testCase "packageVersionTextIO retrieves version" $ do
   version <- PV.packageVersionTextIO "package-version.cabal"
-  "0.4" @=? version
+  "0.4.1" @=? version
 
 textIOFailure :: TestTree
 textIOFailure = testCase "packageVersionTextIO retrieves UNKNOWN" $ do
@@ -107,7 +107,7 @@ textIOFailure = testCase "packageVersionTextIO retrieves UNKNOWN" $ do
 eitherIOSuccess :: TestTree
 eitherIOSuccess = testCase "packageVersionEitherIO retrieves version" $ do
   version <- PV.packageVersionEitherIO "package-version.cabal"
-  Right (MkPackageVersion [0, 4]) @=? version
+  Right (MkPackageVersion [0, 4, 1]) @=? version
 
 eitherIOFailure :: TestTree
 eitherIOFailure = testCase "packageVersionEitherIO retrieves error" $ do
@@ -141,12 +141,12 @@ listIntTHSuccess = testCase "mkPackageVersionTH creates PackageVersion" $ do
 thSuccess :: TestTree
 thSuccess = testCase "packageVersionTH retrieves version" $ do
   let version = $$(PV.packageVersionTH "package-version.cabal")
-  MkPackageVersion [0, 4] @=? version
+  MkPackageVersion [0, 4, 1] @=? version
 
 stringTHSuccess :: TestTree
 stringTHSuccess = testCase "packageVersionStringTH retrieves version" $ do
   let version = $$(PV.packageVersionStringTH "package-version.cabal")
-  "0.4" @=? version
+  "0.4.1" @=? version
 
 stringTHFailure :: TestTree
 stringTHFailure = testCase "packageVersionStringTH retrieves UNKNOWN" $ do
@@ -156,7 +156,7 @@ stringTHFailure = testCase "packageVersionStringTH retrieves UNKNOWN" $ do
 textTHSuccess :: TestTree
 textTHSuccess = testCase "packageVersionTextTH retrieves version" $ do
   let version = $$(PV.packageVersionTextTH "package-version.cabal")
-  "0.4" @=? version
+  "0.4.1" @=? version
 
 textTHFailure :: TestTree
 textTHFailure = testCase "packageVersionTextTH retrieves UNKNOWN" $ do

@@ -242,7 +242,7 @@ toString =
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTH "package-version.cabal")
--- MkPackageVersion {unPackageVersion = 0 :| [4]}
+-- MkPackageVersion {unPackageVersion = 0 :| [4,1]}
 --
 -- @since 0.1.0.0
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -262,7 +262,7 @@ packageVersionTH = ioToTH unsafePackageVersionIO
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionStringTH "package-version.cabal")
--- "0.4"
+-- "0.4.1"
 --
 -- >>> $$(packageVersionStringTH "not-found.cabal")
 -- "UNKNOWN"
@@ -281,7 +281,7 @@ packageVersionStringTH = ioToTH packageVersionStringIO
 --
 -- ==== __Examples__
 -- >>> $$(packageVersionTextTH "package-version.cabal")
--- "0.4"
+-- "0.4.1"
 --
 -- >>> $$(packageVersionTextTH "not-found.cabal")
 -- "UNKNOWN"
@@ -299,7 +299,7 @@ packageVersionTextTH = ioToTH packageVersionTextIO
 --
 -- ==== __Examples__
 -- >>> packageVersionThrowIO "package-version.cabal"
--- MkPackageVersion {unPackageVersion = 0 :| [4]}
+-- MkPackageVersion {unPackageVersion = 0 :| [4,1]}
 --
 -- @since 0.1.0.0
 packageVersionThrowIO :: FilePath -> IO PackageVersion
@@ -311,7 +311,7 @@ packageVersionThrowIO = packageVersionEitherIO >=> either throwIO pure
 --
 -- ==== __Examples__
 -- >>> packageVersionStringIO "package-version.cabal"
--- "0.4"
+-- "0.4.1"
 --
 -- >>> packageVersionStringIO "not-found.cabal"
 -- "UNKNOWN"
@@ -326,7 +326,7 @@ packageVersionStringIO = fmap T.unpack . packageVersionTextIO
 --
 -- ==== __Examples__
 -- >>> packageVersionTextIO "package-version.cabal"
--- "0.4"
+-- "0.4.1"
 --
 -- >>> packageVersionTextIO "not-found.cabal"
 -- "UNKNOWN"
@@ -343,7 +343,7 @@ packageVersionTextIO fp = do
 --
 -- ==== __Examples__
 -- >>> packageVersionEitherIO "package-version.cabal"
--- Right (MkPackageVersion {unPackageVersion = 0 :| [4]})
+-- Right (MkPackageVersion {unPackageVersion = 0 :| [4,1]})
 --
 -- @since 0.1.0.0
 packageVersionEitherIO :: FilePath -> IO (Either ReadFileError PackageVersion)

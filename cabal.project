@@ -19,5 +19,7 @@ package package-version
     -Wunused-type-patterns
     -Wno-unticked-promoted-constructors
 
+allow-newer: boring:base
+
 optimization: 2
 test-show-details: direct
